@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "publisher": "ifs-cloud-team",
   "license": "MIT",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/graknol/ifs-cloud-mcp-vscode"
