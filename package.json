@@ -3,10 +3,26 @@
   "displayName": "IFS Cloud MCP Server",
   "description": "Easy installation and activation of IFS Cloud MCP Server for enhanced development experience",
   "version": "0.0.1",
+  "publisher": "ifs-cloud-team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/graknol/ifs-cloud-core-mcp-server"
+    "url": "https://github.com/graknol/ifs-cloud-mcp-vscode"
+  },
+  "keywords": [
+    "ifs",
+    "cloud",
+    "mcp",
+    "model-context-protocol",
+    "development",
+    "tools",
+    "server",
+    "ai",
+    "assistant"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
   },
   "engines": {
     "vscode": "^1.74.0"

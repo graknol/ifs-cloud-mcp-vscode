@@ -7,3 +7,11 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 src/**
+tsconfig.json
+.git/**
+MARKETPLACE_CHECKLIST.md
+ICON_INSTRUCTIONS.md
+GITHUB_SETUP.md
+FINAL_SUMMARY.md
+PUBLISH_TO_PYPI.md
+icon.svg
