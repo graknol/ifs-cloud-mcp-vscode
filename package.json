@@ -3,9 +3,13 @@
   "displayName": "IFS Cloud MCP Server",
   "description": "Easy installation and activation of IFS Cloud MCP Server for enhanced development experience",
   "version": "0.0.1",
-  "publisher": "ifs-cloud-team",
+  "publisher": "sindrelinden",
   "license": "MIT",
   "icon": "icon.png",
+  "author": {
+    "name": "Sindre van der Linden",
+    "url": "https://www.linkedin.com/in/sindre-v-b8a3269b/"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/graknol/ifs-cloud-mcp-vscode"
