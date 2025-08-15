@@ -745,11 +745,11 @@
         },
         {
           "name": "keyword.declaration.marble",
-          "match": "\\b(entity|view|projection|fragment|client|api|service|procedure|function|method|class|interface|struct|enum|type|namespace|module|import|export|include|using|with|from|select|where|orderby|groupby)\\b"
+          "match": "\\b(entity|view|projection|fragment|client|api|service|procedure|function|method|class|interface|struct|enum|type|namespace|module|import|export|include|using|with|from|select|where|orderby|groupby|query|entityset|structure|enumeration|action|reference|attribute|keys|crud|ludependencies|initialcheck|parameter|array|field|group|list|page|selector|command|commandgroup|dialog|assistant|step|markdowntext|lov)\\b"
         },
         {
           "name": "keyword.modifier.marble",
-          "match": "\\b(public|private|protected|internal|static|readonly|const|virtual|override|abstract|sealed|partial|async|await|extern|unsafe|volatile|ref|out|in|params|event|delegate|operator)\\b"
+          "match": "\\b(public|private|protected|internal|static|readonly|const|virtual|override|abstract|sealed|partial|async|await|extern|unsafe|volatile|ref|out|in|params|event|delegate|operator|required|editable|visible|enabled|label|size|maxlength|fetch|component|layer|description|validate|execute|call|refresh|set|mode)\\b"
         },
         {
           "name": "keyword.operator.marble",
@@ -757,7 +757,7 @@
         },
         {
           "name": "storage.type.primitive.marble",
-          "match": "\\b(string|int|integer|long|short|byte|bool|boolean|float|double|decimal|char|void|object|any|var|let|const|Date|DateTime|Time|Guid|UUID)\\b"
+          "match": "\\b(string|int|integer|long|short|byte|bool|boolean|float|double|decimal|char|void|object|any|var|let|const|Date|DateTime|Time|Guid|UUID|Text|Number|Timestamp|Enumeration|Boolean|Binary|Stream|Clob|Blob|Objid|Objversion|State|SelectedRecords|List|Structure|Parameter)\\b"
         },
         {
           "name": "storage.type.generic.marble",
@@ -949,7 +949,28 @@
     "attributes": {
       "patterns": [
         {
-          "name": "meta.attribute.marble",
+          "name": "meta.attribute.ifs.marble",
+          "begin": "\\b(attribute)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "end": "(?=;|\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.marble"
+            },
+            "2": {
+              "name": "entity.name.attribute.marble"
+            },
+            "3": {
+              "name": "storage.type.primitive.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.attribute.bracket.marble",
           "begin": "\\[([a-zA-Z_][a-zA-Z0-9_]*)",
           "end": "\\]",
           "beginCaptures": {
@@ -962,6 +983,39 @@
               "include": "$self"
             }
           ]
+        },
+        {
+          "name": "meta.entity.ifs.marble",
+          "match": "\\b(entity)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.marble"
+            },
+            "2": {
+              "name": "entity.name.type.entity.marble"
+            }
+          }
+        },
+        {
+          "name": "meta.function.ifs.marble",
+          "match": "\\b(function)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.marble"
+            },
+            "2": {
+              "name": "entity.name.function.marble"
+            }
+          }
+        },
+        {
+          "name": "meta.property.ifs.marble",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*:",
+          "captures": {
+            "1": {
+              "name": "support.type.property-name.marble"
+            }
+          }
         }
       ]
     },

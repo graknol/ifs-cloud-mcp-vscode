@@ -47,6 +47,16 @@
         "category": "IFS Cloud"
       },
       {
+        "command": "ifs-cloud-mcp.importZip",
+        "title": "Import IFS Cloud ZIP File",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.showInstructions",
+        "title": "Show ZIP Import Instructions",
+        "category": "IFS Cloud"
+      },
+      {
         "command": "ifs-cloud-mcp.start",
         "title": "Start IFS Cloud MCP Server",
         "category": "IFS Cloud"
@@ -111,6 +121,12 @@
       "commandPalette": [
         {
           "command": "ifs-cloud-mcp.install"
+        },
+        {
+          "command": "ifs-cloud-mcp.importZip"
+        },
+        {
+          "command": "ifs-cloud-mcp.showInstructions"
         },
         {
           "command": "ifs-cloud-mcp.start"
@@ -205,7 +221,7 @@
     ],
     "themes": [
       {
-        "label": "IFS Cloud Marble Dark",
+        "label": "IFS Cloud Marble - Pastel Dark",
         "uiTheme": "vs-dark",
         "path": "./themes/marble-dark-theme.json"
       }

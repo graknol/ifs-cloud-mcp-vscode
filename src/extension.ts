@@ -218,6 +218,20 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const importZipCommand = vscode.commands.registerCommand(
+    "ifs-cloud-mcp.importZip",
+    async () => {
+      await importZipFile();
+    }
+  );
+
+  const showInstructionsCommand = vscode.commands.registerCommand(
+    "ifs-cloud-mcp.showInstructions",
+    async () => {
+      await showZipInstructions();
+    }
+  );
+
   const startCommand = vscode.commands.registerCommand(
     "ifs-cloud-mcp.start",
     async () => {
@@ -332,6 +346,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     installCommand,
+    importZipCommand,
+    showInstructionsCommand,
     startCommand,
     stopCommand,
     statusCommand,
@@ -424,6 +440,248 @@ async function selectVersionFromList(): Promise<string | undefined> {
   });
 
   return selectedVersion;
+}
+
+// Helper function to check if any versions are available
+async function checkVersionsAvailable(): Promise<boolean> {
+  try {
+    const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+    const installationPath = config.get<string>("installationPath");
+    
+    if (!installationPath || !fs.existsSync(installationPath)) {
+      return false;
+    }
+
+    const pythonExecutable = await findPythonExecutable();
+    if (!pythonExecutable) {
+      return false;
+    }
+
+    const venvPath = path.join(installationPath, ".venv");
+    const venvPython = process.platform === "win32"
+      ? path.join(venvPath, "Scripts", "python.exe")
+      : path.join(venvPath, "bin", "python");
+
+    if (!fs.existsSync(venvPython)) {
+      return false;
+    }
+
+    const listResult = await executeCommand(
+      `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main list --json`
+    );
+
+    if (listResult.success && listResult.output) {
+      try {
+        const versions = JSON.parse(listResult.output);
+        return versions && versions.length > 0;
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function showZipInstructions() {
+  const instructionsContent = `# 📦 IFS Cloud ZIP Import Instructions
+
+## Quick Start Guide
+
+To use the IFS Cloud MCP Server with AI assistance, you need to:
+
+### Step 1: Import IFS Cloud ZIP File
+1. Use command: **IFS Cloud: Import IFS Cloud ZIP File**
+2. Select your IFS Cloud release ZIP file (e.g., IFS_Cloud_24.2.1.zip)
+3. Enter a version identifier (e.g., "24.2.1", "latest", "custom_build")
+4. Wait for extraction and indexing to complete
+
+### Step 2: Start the Server
+1. Use command: **IFS Cloud: Start IFS Cloud MCP Server**
+2. The server will automatically use your imported files
+3. Connect GitHub Copilot or other AI tools to the server
+
+### Step 3: Enjoy Intelligent Code Analysis
+- The AI can now analyze your entire IFS Cloud codebase
+- Get suggestions based on existing patterns
+- Find implementations across 15,000+ files instantly
+
+## What Gets Imported?
+
+The system extracts and indexes these IFS Cloud file types:
+- **.entity** - Entity definitions and data models
+- **.plsql** - Business logic and API implementations
+- **.client** - UI definitions and user workflows
+- **.projection** - Data access patterns and queries
+- **.fragment** - UI components and fragments
+- **.views** - Database views and queries
+- **.storage** - Storage configurations
+- **.plsvc** - Platform services
+
+## File System Structure
+
+Your imported files are organized as:
+\`\`\`
+%APPDATA%\\ifs_cloud_mcp_server\\
+├── extracts\\
+│   ├── 24.2.1\\          # Your imported files
+│   └── latest\\
+└── indexes\\
+    ├── 24.2.1\\          # Search indexes
+    └── latest\\
+\`\`\`
+
+## Version Management
+
+You can import multiple versions:
+- **24.2.1** - Official release
+- **latest** - Latest development build
+- **custom_build** - Your custom modifications
+
+## Need Help?
+
+- **Import ZIP**: Use "IFS Cloud: Import IFS Cloud ZIP File"
+- **List Versions**: Use "IFS Cloud: List Available Versions"
+- **Start Server**: Use "IFS Cloud: Start IFS Cloud MCP Server"
+- **Troubleshoot**: Use "IFS Cloud: Troubleshoot Installation"
+
+Ready to import your first ZIP file? Use the **Import IFS Cloud ZIP File** command!`;
+
+  const document = await vscode.workspace.openTextDocument({
+    content: instructionsContent,
+    language: "markdown",
+  });
+  await vscode.window.showTextDocument(document);
+}
+
+async function importZipFile() {
+  try {
+    const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+    const installationPath = config.get<string>("installationPath");
+    
+    if (!installationPath || !fs.existsSync(installationPath)) {
+      vscode.window.showErrorMessage(
+        "IFS Cloud MCP Server is not installed. Please install it first using 'IFS Cloud: Install IFS Cloud MCP Server'."
+      );
+      return;
+    }
+
+    // Check if Python environment is set up
+    const pythonExecutable = await findPythonExecutable();
+    if (!pythonExecutable) {
+      vscode.window.showErrorMessage(
+        "Python not found. Please install Python and try again."
+      );
+      return;
+    }
+
+    const venvPath = path.join(installationPath, ".venv");
+    const venvPython = process.platform === "win32"
+      ? path.join(venvPath, "Scripts", "python.exe")
+      : path.join(venvPath, "bin", "python");
+
+    if (!fs.existsSync(venvPython)) {
+      vscode.window.showErrorMessage(
+        "Virtual environment not found. Please reinstall the MCP server."
+      );
+      return;
+    }
+
+    // Show file picker for ZIP file
+    const zipFileUri = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      openLabel: "Select IFS Cloud ZIP File",
+      filters: {
+        "ZIP Files": ["zip"],
+        "All Files": ["*"]
+      }
+    });
+
+    if (!zipFileUri || zipFileUri.length === 0) {
+      return;
+    }
+
+    const zipFilePath = zipFileUri[0].fsPath;
+
+    // Ask for version identifier
+    const version = await vscode.window.showInputBox({
+      prompt: "Enter a version identifier for this import (e.g., '24.2.1', 'latest', 'custom_build')",
+      placeHolder: "24.2.1",
+      validateInput: (value: string) => {
+        if (!value || value.trim().length === 0) {
+          return "Version identifier is required";
+        }
+        if (!/^[a-zA-Z0-9._-]+$/.test(value)) {
+          return "Version identifier can only contain letters, numbers, dots, hyphens, and underscores";
+        }
+        return undefined;
+      }
+    });
+
+    if (!version) {
+      return;
+    }
+
+    // Show progress and execute import
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Importing IFS Cloud ZIP File",
+        cancellable: false,
+      },
+      async (progress, token) => {
+        progress.report({ increment: 0, message: "Starting import..." });
+        mcpOutputChannel.show();
+        mcpOutputChannel.appendLine(`🚀 Starting IFS Cloud ZIP import...`);
+        mcpOutputChannel.appendLine(`📦 ZIP file: ${zipFilePath}`);
+        mcpOutputChannel.appendLine(`🏷️  Version: ${version}`);
+
+        const importCommand = `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main import "${zipFilePath}" --version "${version}" --log-level INFO`;
+        
+        progress.report({ increment: 10, message: "Extracting files..." });
+        
+        const importResult = await executeCommand(importCommand);
+        
+        if (importResult.success) {
+          progress.report({ increment: 90, message: "Import completed successfully!" });
+          
+          mcpOutputChannel.appendLine("✅ Import completed successfully!");
+          mcpOutputChannel.appendLine(`📁 Version: ${version}`);
+          if (importResult.output) {
+            mcpOutputChannel.appendLine(importResult.output);
+          }
+          
+          vscode.window.showInformationMessage(
+            `IFS Cloud ZIP file imported successfully as version '${version}'. You can now start the MCP server with this version.`,
+            "Start Server"
+          ).then((selection) => {
+            if (selection === "Start Server") {
+              startMcpServer();
+            }
+          });
+          
+        } else {
+          progress.report({ increment: 100, message: "Import failed" });
+          
+          mcpOutputChannel.appendLine("❌ Import failed!");
+          if (importResult.error) {
+            mcpOutputChannel.appendLine(`Error: ${importResult.error}`);
+          }
+          
+          vscode.window.showErrorMessage(
+            `Failed to import ZIP file: ${importResult.error || "Unknown error"}`
+          );
+        }
+      }
+    );
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    mcpOutputChannel.appendLine(`Error importing ZIP file: ${errorMessage}`);
+    vscode.window.showErrorMessage(`Failed to import ZIP file: ${errorMessage}`);
+  }
 }
 
 async function installMcpServer() {
@@ -642,6 +900,27 @@ async function startMcpServer() {
         await installMcpServer();
       } else if (result === "Configure") {
         await configureMcpServer();
+      }
+      return;
+    }
+
+    // Check if any versions are available before starting
+    const versionsAvailable = await checkVersionsAvailable();
+    if (!versionsAvailable) {
+      const result = await vscode.window.showErrorMessage(
+        "No IFS Cloud versions found. You need to import at least one ZIP file before starting the server.",
+        "Import ZIP File",
+        "View Instructions"
+      );
+      if (result === "Import ZIP File") {
+        await importZipFile();
+      } else if (result === "View Instructions") {
+        vscode.window.showInformationMessage(
+          "To use the IFS Cloud MCP Server, you need to:\n" +
+          "1. Import an IFS Cloud ZIP file using 'IFS Cloud: Import IFS Cloud ZIP File'\n" +
+          "2. Start the server with 'IFS Cloud: Start IFS Cloud MCP Server'\n" +
+          "3. The server will use the imported files for intelligent code analysis"
+        );
       }
       return;
     }
@@ -1113,6 +1392,27 @@ async function startWebUI() {
       vscode.window.showErrorMessage(
         "MCP Server not installed. Please install the server first."
       );
+      return;
+    }
+
+    // Check if any versions are available before starting Web UI
+    const versionsAvailable = await checkVersionsAvailable();
+    if (!versionsAvailable) {
+      const result = await vscode.window.showErrorMessage(
+        "No IFS Cloud versions found. You need to import at least one ZIP file before starting the Web UI.",
+        "Import ZIP File",
+        "View Instructions"
+      );
+      if (result === "Import ZIP File") {
+        await importZipFile();
+      } else if (result === "View Instructions") {
+        vscode.window.showInformationMessage(
+          "To use the IFS Cloud Web UI, you need to:\n" +
+          "1. Import an IFS Cloud ZIP file using 'IFS Cloud: Import IFS Cloud ZIP File'\n" +
+          "2. Start the Web UI with 'IFS Cloud: Start Web UI'\n" +
+          "3. The Web UI will provide a visual interface to browse your imported files"
+        );
+      }
       return;
     }
 

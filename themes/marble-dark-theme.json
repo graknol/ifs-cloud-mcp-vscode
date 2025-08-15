@@ -1,12 +1,14 @@
 {
-  "name": "Marble Dark Enhanced",
+  "name": "IFS Cloud Marble - Pastel Dark",
   "type": "dark",
   "colors": {
-    "editor.background": "#0d1117",
-    "editor.foreground": "#e6edf3",
-    "activityBar.background": "#010409",
-    "sideBar.background": "#161b22",
-    "statusBar.background": "#21262d"
+    "editor.background": "#1a1b26",
+    "editor.foreground": "#c0caf5",
+    "activityBar.background": "#16161e",
+    "sideBar.background": "#1f2335",
+    "statusBar.background": "#16161e",
+    "panel.background": "#1f2335",
+    "terminal.background": "#1a1b26"
   },
   "tokenColors": [
     {
@@ -17,7 +19,7 @@
       ],
       "settings": {
         "fontStyle": "italic",
-        "foreground": "#7d8590"
+        "foreground": "#565f89"
       }
     },
     {
@@ -28,14 +30,14 @@
       ],
       "settings": {
         "fontStyle": "italic",
-        "foreground": "#8b949e"
+        "foreground": "#737aa2"
       }
     },
     {
       "name": "String",
       "scope": "string",
       "settings": {
-        "foreground": "#a5d6ff"
+        "foreground": "#9ece6a"
       }
     },
     {
@@ -45,7 +47,7 @@
         "meta.interpolation"
       ],
       "settings": {
-        "foreground": "#79c0ff"
+        "foreground": "#73daca"
       }
     },
     {
@@ -112,7 +114,7 @@
         "keyword.other.using"
       ],
       "settings": {
-        "foreground": "#ff7b72",
+        "foreground": "#bb9af7",
         "fontStyle": "bold"
       }
     },
@@ -123,7 +125,46 @@
         "keyword.operator"
       ],
       "settings": {
-        "foreground": "#ff7b72"
+        "foreground": "#f7768e"
+      }
+    },
+    {
+      "name": "IFS Modifiers",
+      "scope": [
+        "keyword.modifier"
+      ],
+      "settings": {
+        "foreground": "#7dcfff"
+      }
+    },
+    {
+      "name": "IFS Data Types",
+      "scope": [
+        "storage.type.primitive"
+      ],
+      "settings": {
+        "foreground": "#2ac3de"
+      }
+    },
+    {
+      "name": "IFS Entity Names",
+      "scope": [
+        "entity.name.attribute.marble",
+        "entity.name.type.entity.marble",
+        "entity.name.function.marble"
+      ],
+      "settings": {
+        "foreground": "#e0af68"
+      }
+    },
+    {
+      "name": "IFS Property Names",
+      "scope": [
+        "support.type.property-name.marble",
+        "variable.other.property.marble"
+      ],
+      "settings": {
+        "foreground": "#7aa2f7"
       }
     },
     {
