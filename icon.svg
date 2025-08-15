@@ -1,27 +1,29 @@
 <svg width="128" height="128" viewBox="0 0 128 128"
   xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#007ACC;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#00BCF2;stop-opacity:1" />
+    <!-- Simplified flat gradient -->
+    <linearGradient id="flatGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8a52e6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5a3399;stop-opacity:1" />
     </linearGradient>
   </defs>
 
-  <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="url(#grad1)" stroke="#ffffff" stroke-width="2"/>
+  <!-- Simple flat circle background -->
+  <circle cx="64" cy="64" r="58" fill="url(#flatGradient)"/>
 
-  <!-- IFS Text -->
-  <text x="64" y="45" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">IFS</text>
+  <!-- Vertical pill-shaped eyes -->
+  <g>
+    <!-- Left eye -->
+    <rect x="29" y="59" width="12" height="12" fill="#FFFFFF"/>
+    <circle cx="35" cy="59" r="6" fill="#FFFFFF"/>
+    <circle cx="35" cy="71" r="6" fill="#FFFFFF"/>
 
-  <!-- Cloud icon -->
-  <path d="M40 65 C30 65, 25 75, 35 80 L85 80 C95 80, 95 65, 85 65 C85 55, 75 50, 65 55 C60 50, 50 50, 45 55 C40 55, 35 60, 40 65 Z" fill="white" opacity="0.9"/>
+    <!-- Right eye -->
+    <rect x="87" y="59" width="12" height="12" fill="#FFFFFF"/>
+    <circle cx="93" cy="59" r="6" fill="#FFFFFF"/>
+    <circle cx="93" cy="71" r="6" fill="#FFFFFF"/>
+  </g>
 
-  <!-- MCP text -->
-  <text x="64" y="95" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="white" text-anchor="middle">MCP</text>
-
-  <!-- Connection dots -->
-  <circle cx="20" cy="64" r="3" fill="white" opacity="0.7"/>
-  <circle cx="108" cy="64" r="3" fill="white" opacity="0.7"/>
-  <line x1="23" y1="64" x2="35" y2="70" stroke="white" stroke-width="1" opacity="0.5"/>
-  <line x1="93" y1="70" x2="105" y2="64" stroke="white" stroke-width="1" opacity="0.5"/>
+  <!-- Simple MCP indicator -->
+  <text x="64" y="100" font-family="'Segoe UI', 'San Francisco', -apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle" style="text-rendering: optimizeLegibility;">MCP</text>
 </svg>

@@ -1,8 +1,8 @@
 {
   "name": "ifs-cloud-mcp-vscode",
   "displayName": "IFS Cloud MCP Server",
-  "description": "Easy installation and activation of IFS Cloud MCP Server for enhanced development experience",
-  "version": "0.0.1",
+  "description": "Transform IFS Cloud development with AI-powered code intelligence. One-click installation, ZIP import workflow, and intelligent analysis of 15,000+ source files.",
+  "version": "0.1.0",
   "publisher": "sindrelinden",
   "license": "MIT",
   "icon": "icon.png",
@@ -33,6 +33,8 @@
     "vscode": "^1.74.0"
   },
   "categories": [
+    "Machine Learning",
+    "Programming Languages",
     "Other"
   ],
   "activationEvents": [

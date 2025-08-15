@@ -417,16 +417,14 @@ async function listAvailableVersions(): Promise<string[]> {
     return [];
   } catch (error) {
     console.error("Failed to list versions:", error);
-    vscode.window.showErrorMessage(
-      `Failed to list versions: ${error}`
-    );
+    vscode.window.showErrorMessage(`Failed to list versions: ${error}`);
     return [];
   }
 }
 
 async function selectVersionFromList(): Promise<string | undefined> {
   const versions = await listAvailableVersions();
-  
+
   if (versions.length === 0) {
     vscode.window.showInformationMessage(
       "No indexed versions found. Please index some IFS Cloud code first."
@@ -447,7 +445,7 @@ async function checkVersionsAvailable(): Promise<boolean> {
   try {
     const config = vscode.workspace.getConfiguration("ifsCloudMcp");
     const installationPath = config.get<string>("installationPath");
-    
+
     if (!installationPath || !fs.existsSync(installationPath)) {
       return false;
     }
@@ -458,9 +456,10 @@ async function checkVersionsAvailable(): Promise<boolean> {
     }
 
     const venvPath = path.join(installationPath, ".venv");
-    const venvPython = process.platform === "win32"
-      ? path.join(venvPath, "Scripts", "python.exe")
-      : path.join(venvPath, "bin", "python");
+    const venvPython =
+      process.platform === "win32"
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
 
     if (!fs.existsSync(venvPython)) {
       return false;
@@ -560,7 +559,7 @@ async function importZipFile() {
   try {
     const config = vscode.workspace.getConfiguration("ifsCloudMcp");
     const installationPath = config.get<string>("installationPath");
-    
+
     if (!installationPath || !fs.existsSync(installationPath)) {
       vscode.window.showErrorMessage(
         "IFS Cloud MCP Server is not installed. Please install it first using 'IFS Cloud: Install IFS Cloud MCP Server'."
@@ -578,9 +577,10 @@ async function importZipFile() {
     }
 
     const venvPath = path.join(installationPath, ".venv");
-    const venvPython = process.platform === "win32"
-      ? path.join(venvPath, "Scripts", "python.exe")
-      : path.join(venvPath, "bin", "python");
+    const venvPython =
+      process.platform === "win32"
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
 
     if (!fs.existsSync(venvPython)) {
       vscode.window.showErrorMessage(
@@ -595,8 +595,8 @@ async function importZipFile() {
       openLabel: "Select IFS Cloud ZIP File",
       filters: {
         "ZIP Files": ["zip"],
-        "All Files": ["*"]
-      }
+        "All Files": ["*"],
+      },
     });
 
     if (!zipFileUri || zipFileUri.length === 0) {
@@ -607,7 +607,8 @@ async function importZipFile() {
 
     // Ask for version identifier
     const version = await vscode.window.showInputBox({
-      prompt: "Enter a version identifier for this import (e.g., '24.2.1', 'latest', 'custom_build')",
+      prompt:
+        "Enter a version identifier for this import (e.g., '24.2.1', 'latest', 'custom_build')",
       placeHolder: "24.2.1",
       validateInput: (value: string) => {
         if (!value || value.trim().length === 0) {
@@ -617,7 +618,7 @@ async function importZipFile() {
           return "Version identifier can only contain letters, numbers, dots, hyphens, and underscores";
         }
         return undefined;
-      }
+      },
     });
 
     if (!version) {
@@ -639,48 +640,55 @@ async function importZipFile() {
         mcpOutputChannel.appendLine(`🏷️  Version: ${version}`);
 
         const importCommand = `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main import "${zipFilePath}" --version "${version}" --log-level INFO`;
-        
+
         progress.report({ increment: 10, message: "Extracting files..." });
-        
+
         const importResult = await executeCommand(importCommand);
-        
+
         if (importResult.success) {
-          progress.report({ increment: 90, message: "Import completed successfully!" });
-          
+          progress.report({
+            increment: 90,
+            message: "Import completed successfully!",
+          });
+
           mcpOutputChannel.appendLine("✅ Import completed successfully!");
           mcpOutputChannel.appendLine(`📁 Version: ${version}`);
           if (importResult.output) {
             mcpOutputChannel.appendLine(importResult.output);
           }
-          
-          vscode.window.showInformationMessage(
-            `IFS Cloud ZIP file imported successfully as version '${version}'. You can now start the MCP server with this version.`,
-            "Start Server"
-          ).then((selection) => {
-            if (selection === "Start Server") {
-              startMcpServer();
-            }
-          });
-          
+
+          vscode.window
+            .showInformationMessage(
+              `IFS Cloud ZIP file imported successfully as version '${version}'. You can now start the MCP server with this version.`,
+              "Start Server"
+            )
+            .then((selection) => {
+              if (selection === "Start Server") {
+                startMcpServer();
+              }
+            });
         } else {
           progress.report({ increment: 100, message: "Import failed" });
-          
+
           mcpOutputChannel.appendLine("❌ Import failed!");
           if (importResult.error) {
             mcpOutputChannel.appendLine(`Error: ${importResult.error}`);
           }
-          
+
           vscode.window.showErrorMessage(
-            `Failed to import ZIP file: ${importResult.error || "Unknown error"}`
+            `Failed to import ZIP file: ${
+              importResult.error || "Unknown error"
+            }`
           );
         }
       }
     );
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     mcpOutputChannel.appendLine(`Error importing ZIP file: ${errorMessage}`);
-    vscode.window.showErrorMessage(`Failed to import ZIP file: ${errorMessage}`);
+    vscode.window.showErrorMessage(
+      `Failed to import ZIP file: ${errorMessage}`
+    );
   }
 }
 
@@ -917,9 +925,9 @@ async function startMcpServer() {
       } else if (result === "View Instructions") {
         vscode.window.showInformationMessage(
           "To use the IFS Cloud MCP Server, you need to:\n" +
-          "1. Import an IFS Cloud ZIP file using 'IFS Cloud: Import IFS Cloud ZIP File'\n" +
-          "2. Start the server with 'IFS Cloud: Start IFS Cloud MCP Server'\n" +
-          "3. The server will use the imported files for intelligent code analysis"
+            "1. Import an IFS Cloud ZIP file using 'IFS Cloud: Import IFS Cloud ZIP File'\n" +
+            "2. Start the server with 'IFS Cloud: Start IFS Cloud MCP Server'\n" +
+            "3. The server will use the imported files for intelligent code analysis"
         );
       }
       return;
@@ -1007,11 +1015,11 @@ async function startMcpServer() {
 
         // Use detected Python to run the server as a module (not directly)
         const args = ["-m", "ifs_cloud_mcp_server.main", "server"];
-        
+
         // Check if a version is selected (new version-based startup)
         const selectedVersion = config.get<string>("selectedVersion");
         const indexPath = config.get<string>("indexPath");
-        
+
         if (selectedVersion) {
           // Use version-based startup (preferred)
           args.push("--version", selectedVersion);
@@ -1021,7 +1029,9 @@ async function startMcpServer() {
           args.push("--index-path", indexPath);
           mcpOutputChannel.appendLine(`Using index path: ${indexPath}`);
         } else {
-          mcpOutputChannel.appendLine("No version or index path configured - using server defaults");
+          mcpOutputChannel.appendLine(
+            "No version or index path configured - using server defaults"
+          );
         }
 
         // Handle complex Python commands (like "uv run python" or "conda run -n base python")
@@ -1151,7 +1161,7 @@ async function configureMcpServer() {
 
   const options = [
     "Select Version",
-    "List Available Versions", 
+    "List Available Versions",
     "Set Server Path",
     "Browse for Server Installation",
     "Set Index Path",
@@ -1315,7 +1325,7 @@ async function configureMcpServer() {
 function updateStatusBar() {
   const mcpRunning = mcpServerProcess !== null && !mcpServerProcess.killed;
   const webUIRunning = webUIProcess !== null && !webUIProcess.killed;
-  
+
   // Get the selected version to display in status
   const config = vscode.workspace.getConfiguration("ifsCloudMcp");
   const selectedVersion = config.get<string>("selectedVersion");
@@ -1408,9 +1418,9 @@ async function startWebUI() {
       } else if (result === "View Instructions") {
         vscode.window.showInformationMessage(
           "To use the IFS Cloud Web UI, you need to:\n" +
-          "1. Import an IFS Cloud ZIP file using 'IFS Cloud: Import IFS Cloud ZIP File'\n" +
-          "2. Start the Web UI with 'IFS Cloud: Start Web UI'\n" +
-          "3. The Web UI will provide a visual interface to browse your imported files"
+            "1. Import an IFS Cloud ZIP file using 'IFS Cloud: Import IFS Cloud ZIP File'\n" +
+            "2. Start the Web UI with 'IFS Cloud: Start Web UI'\n" +
+            "3. The Web UI will provide a visual interface to browse your imported files"
         );
       }
       return;
@@ -1458,7 +1468,9 @@ async function startWebUI() {
           args.push("--index-path", indexPath);
           webUIOutputChannel.appendLine(`Using index path: ${indexPath}`);
         } else {
-          webUIOutputChannel.appendLine("No version or index path configured - using defaults");
+          webUIOutputChannel.appendLine(
+            "No version or index path configured - using defaults"
+          );
         }
 
         // The web_ui module automatically finds an available port in the 5700-5799 range

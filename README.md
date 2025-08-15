@@ -1,73 +1,151 @@
-# IFS Cloud MCP VS Code Extension
+# 🚀 IFS Cloud MCP VS Code Extension
 
-This VS Code extension provides easy installation and management of the IFS Cloud MCP Server.
+<div align="center">
 
-## Features
+**Transform your IFS Cloud development with AI-powered intelligence**
 
-- **One-click installation** of IFS Cloud MCP Server using UV
-- **Server management** with start/stop commands
-- **Version-based startup** with automatic version selection
-- **Status monitoring** with status bar indicator
-- **Configuration management** for server and index paths
-- **Web UI support** with automatic URL detection
-- **Marble language support** with syntax highlighting and snippets
-- **Auto-start** option for seamless development experience
+[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue?logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=sindrelinden.ifs-cloud-mcp-vscode)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/graknol/ifs-cloud-mcp-vscode)
 
-## Commands
+_One-click installation • ZIP import workflow • Intelligent code analysis • 15,000+ files indexed_
 
-- `IFS Cloud: Install IFS Cloud MCP Server` - Install the MCP server using UV
-- `IFS Cloud: Start IFS Cloud MCP Server` - Start the MCP server
-- `IFS Cloud: Stop IFS Cloud MCP Server` - Stop the MCP server
-- `IFS Cloud: Check IFS Cloud MCP Server Status` - Check server status
-- `IFS Cloud: Configure IFS Cloud MCP Server` - Configure server settings
-- `IFS Cloud: Select IFS Cloud Version` - Choose from available indexed versions
-- `IFS Cloud: List Available Versions` - Display all indexed versions
-- `IFS Cloud: Start Web UI` - Launch the web interface
-- `IFS Cloud: Stop Web UI` - Stop the web interface
+</div>
 
-## Marble Language Support
+---
 
-This extension includes comprehensive support for Marble files:
+## ✨ **What This Extension Does**
 
-- **Syntax Highlighting**: Full syntax highlighting for Marble language constructs
-- **Code Snippets**: Pre-built snippets for entities, views, services, and more
-- **Custom Theme**: Dark theme optimized for Marble syntax
-- **Language Features**: Auto-closing pairs, bracket matching, smart indentation
+🧠 **Supercharge your IFS Cloud development** with AI that understands your entire codebase  
+📦 **Import ZIP files** containing IFS Cloud source code for intelligent analysis  
+🎯 **Get instant suggestions** based on existing patterns across 15,000+ files  
+🔍 **Find implementations** in seconds across entities, projections, clients, and fragments
 
-See [MARBLE_LANGUAGE.md](MARBLE_LANGUAGE.md) for detailed information about Marble language support.
+## 🎯 **Quick Start** (3 Steps)
 
-## Configuration
+```bash
+1️⃣ Install Extension → "Install IFS Cloud MCP Server"
+2️⃣ Import ZIP File → "Import IFS Cloud ZIP File"
+3️⃣ Start AI Server → "Start IFS Cloud MCP Server"
+```
 
-- `ifsCloudMcp.serverPath` - Path to the MCP server executable
-- `ifsCloudMcp.installationPath` - Directory where MCP server is installed
-- `ifsCloudMcp.indexPath` - Path to your IFS Cloud code index (legacy)
-- `ifsCloudMcp.selectedVersion` - Selected IFS Cloud version for version-based startup
-- `ifsCloudMcp.autoStart` - Automatically start server when VS Code opens
+**That's it!** GitHub Copilot now has intelligent access to your entire IFS Cloud codebase 🎉
 
-## Requirements
+## 🔥 **Key Features**
 
-- [UV](https://docs.astral.sh/uv/) package manager
-- Python 3.8 or higher
+### 📦 **Smart ZIP Import**
 
-## Installation
+- **Drag & Drop** ZIP files containing IFS Cloud source code
+- **Automatic extraction** of 15,000+ files (entities, PLSQL, clients, fragments)
+- **Lightning-fast indexing** with Tantivy search engine
+- **Version management** for multiple releases (24.2.1, latest, custom builds)
 
-1. Install this extension from the VS Code marketplace
-2. Run the "Install IFS Cloud MCP Server" command
-3. Configure your index path in settings
-4. Start using IFS Cloud development tools!
+### 🧠 **AI-Powered Development**
 
-## Usage
+- **Intelligent suggestions** based on existing code patterns
+- **Cross-file analysis** across entities, projections, and business logic
+- **Pattern recognition** for IFS Cloud best practices
+- **Code generation** following IFS conventions
 
-1. Open VS Code in an IFS Cloud project
-2. Use Ctrl+Shift+P to open command palette
-3. Type "IFS Cloud" to see available commands
-4. Install and start the MCP server
-5. The status bar will show server status
+### 🎨 **IFS Language Support**
 
-## Support
+- **Syntax highlighting** for `.marble`, `.client`, `.fragment`, `.projection` files
+- **Beautiful pastel theme** optimized for IFS development
+- **Smart snippets** for entities, views, services, and components
+- **Auto-completion** for IFS-specific keywords
 
-For issues and feature requests, please visit our [GitHub repository](https://github.com/graknol/ifs-cloud-core-mcp-server).
+### 🌐 **Web Interface**
 
-## License
+- **Visual file browser** for imported ZIP contents
+- **Search interface** across your entire codebase
+- **Live preview** of IFS files with syntax highlighting
+- **Export capabilities** for analysis and documentation
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📋 **Essential Commands**
+
+| Command                             | Description              | When to Use           |
+| ----------------------------------- | ------------------------ | --------------------- |
+| 🔧 **Install IFS Cloud MCP Server** | One-click server setup   | First time setup      |
+| 📦 **Import IFS Cloud ZIP File**    | Import & index ZIP files | Before development    |
+| 🚀 **Start IFS Cloud MCP Server**   | Activate AI intelligence | Daily development     |
+| 🌐 **Start Web UI**                 | Launch visual interface  | Browse imported files |
+| 📊 **List Available Versions**      | Show imported versions   | Version management    |
+
+## 🔒 **Built-in Safety**
+
+✅ **Cannot start without data** - Prevents empty server starts  
+✅ **Validates imports** - Ensures successful ZIP processing  
+✅ **Progress tracking** - Real-time import status  
+✅ **Error recovery** - Helpful troubleshooting guidance
+
+## 🎨 **File Types Supported**
+
+| Extension     | Purpose        | AI Benefits                 |
+| ------------- | -------------- | --------------------------- |
+| `.entity`     | Data models    | Generate business entities  |
+| `.plsql`      | Business logic | Suggest API implementations |
+| `.client`     | UI definitions | Create user interfaces      |
+| `.projection` | Data access    | Design data layers          |
+| `.fragment`   | UI components  | Build reusable fragments    |
+| `.views`      | Database views | Optimize queries            |
+
+## ⚡ **Performance**
+
+- **15,000+ files** indexed in seconds
+- **Millisecond searches** across entire codebase
+- **Intelligent caching** for rapid subsequent imports
+- **Memory efficient** batch processing
+
+## 🛠 **Requirements**
+
+- **VS Code** 1.74.0 or higher
+- **Python** 3.8+ (auto-detected)
+- **Git** (for installation)
+- **IFS Cloud ZIP file** (from your IFS Cloud release)
+
+## 📖 **Quick Examples**
+
+### Import Your First ZIP
+
+```
+Command Palette → "IFS Cloud: Import IFS Cloud ZIP File"
+→ Select: IFS_Cloud_24.2.1.zip
+→ Version: "24.2.1"
+→ ✅ 15,847 files indexed!
+```
+
+### Start AI Development
+
+```
+Command Palette → "IFS Cloud: Start IFS Cloud MCP Server"
+→ GitHub Copilot now knows your entire codebase
+→ Ask: "Create customer order validation logic"
+→ Get: Intelligent suggestions based on existing patterns!
+```
+
+## 🎯 **Perfect For**
+
+- 🏢 **IFS Cloud developers** working with large codebases
+- 🤖 **AI-assisted development** with GitHub Copilot
+- 📚 **Code exploration** and pattern discovery
+- 🔍 **Legacy code analysis** and modernization
+- 📖 **Documentation generation** from existing code
+
+## 🚀 **Get Started**
+
+1. **Install** this extension from VS Code Marketplace
+2. **Run** `IFS Cloud: Install IFS Cloud MCP Server`
+3. **Import** your IFS Cloud ZIP file
+4. **Start** developing with AI superpowers!
+
+---
+
+<div align="center">
+
+**Ready to supercharge your IFS Cloud development?**
+
+[Install Extension](https://marketplace.visualstudio.com/items?itemName=sindrelinden.ifs-cloud-mcp-vscode) • [View GitHub](https://github.com/graknol/ifs-cloud-mcp-vscode) • [Report Issues](https://github.com/graknol/ifs-cloud-mcp-vscode/issues)
+
+_Made with ❤️ for the IFS Cloud community_
+
+</div>
