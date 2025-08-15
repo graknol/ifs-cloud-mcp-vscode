@@ -10,6 +10,7 @@ let webUIUrl: string | null = null;
 let statusBarItem: vscode.StatusBarItem;
 let mcpOutputChannel: vscode.OutputChannel;
 let webUIOutputChannel: vscode.OutputChannel;
+let mcpServerProvider: IfsCloudMcpServerProvider | null = null;
 
 const execAsync = promisify(exec);
 
@@ -140,7 +141,7 @@ async function troubleshootInstallation() {
         diagnosticInfo += "Testing server startup...\n";
 
         const serverTest = await executeCommand(
-          `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main --help`
+          `cd "${installationPath}" && "${venvPython}" -m src.ifs_cloud_mcp_server.main --help`
         );
         diagnosticInfo += `Server Help Command: ${
           serverTest.success ? "✅ Success" : "❌ Failed"
@@ -190,6 +191,149 @@ async function troubleshootInstallation() {
   await vscode.window.showTextDocument(document);
 }
 
+// MCP Server Definition Provider for automatic registration with Copilot Chat
+class IfsCloudMcpServerProvider implements vscode.McpServerDefinitionProvider {
+  private _onDidChangeMcpServerDefinitions = new vscode.EventEmitter<void>();
+  readonly onDidChangeMcpServerDefinitions =
+    this._onDidChangeMcpServerDefinitions.event;
+
+  async provideMcpServerDefinitions(
+    token: vscode.CancellationToken
+  ): Promise<vscode.McpStdioServerDefinition[]> {
+    const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+    const installationPath = config.get<string>("installationPath");
+    const selectedVersion = config.get<string>("selectedVersion");
+
+    // Only provide the server definition if it's properly installed
+    if (!installationPath || !fs.existsSync(installationPath)) {
+      console.log("IFS Cloud MCP: No installation path or path doesn't exist");
+      return [];
+    }
+
+    const venvPath = path.join(installationPath, ".venv");
+    const venvPython =
+      process.platform === "win32"
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
+
+    if (!fs.existsSync(venvPython)) {
+      console.log("IFS Cloud MCP: Virtual environment Python not found");
+      return [];
+    }
+
+    // Critical: Check if any versions are available before providing the server
+    try {
+      const versionsAvailable = await checkVersionsAvailable();
+      if (!versionsAvailable) {
+        console.log(
+          "IFS Cloud MCP: No indexed versions available - not registering server"
+        );
+        return [];
+      }
+    } catch (error) {
+      console.log("IFS Cloud MCP: Error checking versions:", error);
+      return [];
+    }
+
+    // Verify the selected version exists if specified
+    if (selectedVersion) {
+      try {
+        const availableVersions = await listAvailableVersions();
+        if (!availableVersions.includes(selectedVersion)) {
+          console.log(
+            `IFS Cloud MCP: Selected version '${selectedVersion}' not available`
+          );
+          return [];
+        }
+      } catch (error) {
+        console.log("IFS Cloud MCP: Error listing versions:", error);
+        return [];
+      }
+    }
+
+    // Build the server definition
+    const args = [
+      "-m",
+      "src.ifs_cloud_mcp_server.main",
+      "server",
+      "--transport",
+      "stdio",
+    ];
+    if (selectedVersion) {
+      args.push("--version", selectedVersion);
+    }
+
+    const serverDefinition = new vscode.McpStdioServerDefinition(
+      "IFS Cloud MCP Server",
+      venvPython,
+      args,
+      {},
+      selectedVersion || "1.0.0"
+    );
+
+    console.log("IFS Cloud MCP: Server definition provided successfully");
+    return [serverDefinition];
+  }
+
+  async resolveMcpServerDefinition(
+    server: vscode.McpStdioServerDefinition,
+    token: vscode.CancellationToken
+  ): Promise<vscode.McpStdioServerDefinition | undefined> {
+    // Double-check that we have indexed versions available before allowing server start
+    try {
+      const versionsAvailable = await checkVersionsAvailable();
+      if (!versionsAvailable) {
+        vscode.window.showErrorMessage(
+          "IFS Cloud MCP Server: No indexed versions found. Please import a ZIP file first using 'IFS Cloud: Import IFS Cloud ZIP File'."
+        );
+        return undefined;
+      }
+    } catch (error) {
+      console.error(
+        "IFS Cloud MCP: Error checking versions during resolve:",
+        error
+      );
+      vscode.window.showErrorMessage(
+        "IFS Cloud MCP Server: Unable to verify indexed data. Please check the installation."
+      );
+      return undefined;
+    }
+
+    // Verify the server installation is still valid
+    const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+    const installationPath = config.get<string>("installationPath");
+
+    if (!installationPath || !fs.existsSync(installationPath)) {
+      vscode.window.showErrorMessage(
+        "IFS Cloud MCP Server: Installation path no longer exists. Please reinstall the server."
+      );
+      return undefined;
+    }
+
+    // Verify Python executable still exists
+    const venvPath = path.join(installationPath, ".venv");
+    const venvPython =
+      process.platform === "win32"
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
+
+    if (!fs.existsSync(venvPython)) {
+      vscode.window.showErrorMessage(
+        "IFS Cloud MCP Server: Python environment no longer exists. Please reinstall the server."
+      );
+      return undefined;
+    }
+
+    console.log("IFS Cloud MCP: Server resolution successful - ready to start");
+    return server;
+  }
+
+  // Method to notify VS Code that server definitions have changed
+  refresh() {
+    this._onDidChangeMcpServerDefinitions.fire();
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   console.log("IFS Cloud MCP Server extension activated");
 
@@ -232,24 +376,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const startCommand = vscode.commands.registerCommand(
-    "ifs-cloud-mcp.start",
-    async () => {
-      await startMcpServer();
-    }
-  );
-
-  const stopCommand = vscode.commands.registerCommand(
-    "ifs-cloud-mcp.stop",
-    async () => {
-      await stopMcpServer();
-    }
-  );
-
   const statusCommand = vscode.commands.registerCommand(
     "ifs-cloud-mcp.status",
     async () => {
-      await checkServerStatus();
+      await checkServerRegistrationStatus();
     }
   );
 
@@ -287,6 +417,14 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(
           `Selected version: ${selectedVersion}. Server will use version-based startup.`
         );
+
+        // Refresh MCP provider since the server configuration changed
+        if (mcpServerProvider) {
+          mcpServerProvider.refresh();
+          console.log(
+            "IFS Cloud MCP: Provider refreshed after version selection"
+          );
+        }
       }
     }
   );
@@ -344,12 +482,17 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const generateConfigCommand = vscode.commands.registerCommand(
+    "ifs-cloud-mcp.generateConfig",
+    async () => {
+      await generateMcpClientConfig();
+    }
+  );
+
   context.subscriptions.push(
     installCommand,
     importZipCommand,
     showInstructionsCommand,
-    startCommand,
-    stopCommand,
     statusCommand,
     configureCommand,
     troubleshootCommand,
@@ -359,13 +502,22 @@ export function activate(context: vscode.ExtensionContext) {
     stopWebUICommand,
     showMcpOutputCommand,
     showWebUIOutputCommand,
-    openWebUICommand
+    openWebUICommand,
+    generateConfigCommand
   );
 
-  // Auto-start if configured
-  const config = vscode.workspace.getConfiguration("ifsCloudMcp");
-  if (config.get("autoStart")) {
-    startMcpServer();
+  // Register MCP Server Definition Provider
+  try {
+    mcpServerProvider = new IfsCloudMcpServerProvider();
+    const disposable = vscode.lm.registerMcpServerDefinitionProvider(
+      "ifs-cloud.mcp-servers",
+      mcpServerProvider
+    );
+    context.subscriptions.push(disposable);
+    console.log("IFS Cloud MCP Server provider registered successfully");
+  } catch (error) {
+    console.warn("Failed to register MCP server provider:", error);
+    // Fallback to manual registration instructions
   }
 }
 
@@ -398,7 +550,7 @@ async function listAvailableVersions(): Promise<string[]> {
 
     // Execute the list command with JSON output
     const result = await execAsync(
-      `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main list --json`
+      `cd "${installationPath}" && "${venvPython}" -m src.ifs_cloud_mcp_server.main list --json`
     );
 
     if (result.stdout) {
@@ -466,7 +618,7 @@ async function checkVersionsAvailable(): Promise<boolean> {
     }
 
     const listResult = await executeCommand(
-      `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main list --json`
+      `cd "${installationPath}" && "${venvPython}" -m src.ifs_cloud_mcp_server.main list --json`
     );
 
     if (listResult.success && listResult.output) {
@@ -639,7 +791,7 @@ async function importZipFile() {
         mcpOutputChannel.appendLine(`📦 ZIP file: ${zipFilePath}`);
         mcpOutputChannel.appendLine(`🏷️  Version: ${version}`);
 
-        const importCommand = `cd "${installationPath}" && "${venvPython}" -m ifs_cloud_mcp_server.main import "${zipFilePath}" --version "${version}" --log-level INFO`;
+        const importCommand = `cd "${installationPath}" && "${venvPython}" -m src.ifs_cloud_mcp_server.main import "${zipFilePath}" --version "${version}" --log-level INFO`;
 
         progress.report({ increment: 10, message: "Extracting files..." });
 
@@ -667,6 +819,14 @@ async function importZipFile() {
                 startMcpServer();
               }
             });
+
+          // Refresh MCP provider now that we have indexed data available
+          if (mcpServerProvider) {
+            mcpServerProvider.refresh();
+            console.log(
+              "IFS Cloud MCP: Provider refreshed after ZIP import - server now discoverable by Copilot"
+            );
+          }
         } else {
           progress.report({ increment: 100, message: "Import failed" });
 
@@ -877,6 +1037,12 @@ async function installMcpServer() {
           vscode.window.showInformationMessage(
             `IFS Cloud MCP Server installed successfully at: ${installDir}`
           );
+
+          // Refresh MCP provider to make server discoverable (but won't be active until ZIP is imported)
+          if (mcpServerProvider) {
+            mcpServerProvider.refresh();
+            console.log("IFS Cloud MCP: Provider refreshed after installation");
+          }
         }
       );
     }
@@ -1014,7 +1180,13 @@ async function startMcpServer() {
         progress.report({ increment: 50, message: "Launching server..." });
 
         // Use detected Python to run the server as a module (not directly)
-        const args = ["-m", "ifs_cloud_mcp_server.main", "server"];
+        const args = [
+          "-m",
+          "src.ifs_cloud_mcp_server.main",
+          "server",
+          "--transport",
+          "stdio",
+        ];
 
         // Check if a version is selected (new version-based startup)
         const selectedVersion = config.get<string>("selectedVersion");
@@ -1145,15 +1317,70 @@ async function stopMcpServer() {
   }
 }
 
-async function checkServerStatus() {
-  const isRunning = mcpServerProcess !== null && !mcpServerProcess.killed;
-  const status = isRunning ? "Running" : "Stopped";
-  const icon = isRunning ? "$(check)" : "$(circle-slash)";
+async function checkServerRegistrationStatus() {
+  const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+  const installationPath = config.get<string>("installationPath");
+  const selectedVersion = config.get<string>("selectedVersion");
 
-  vscode.window.showInformationMessage(
-    `IFS Cloud MCP Server Status: ${status}`
-  );
-  updateStatusBar();
+  let statusMessage = "🤖 **IFS Cloud MCP Server Registration Status**\n\n";
+
+  // Check installation
+  if (!installationPath || !fs.existsSync(installationPath)) {
+    statusMessage += "❌ **Not Installed**: Server not installed\n";
+    statusMessage += "➡️ Use 'Install IFS Cloud MCP Server' to install\n\n";
+  } else {
+    statusMessage += "✅ **Installed**: Server installation found\n";
+    statusMessage += `📁 Path: ${installationPath}\n\n`;
+
+    // Check virtual environment
+    const venvPath = path.join(installationPath, ".venv");
+    const venvPython =
+      process.platform === "win32"
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
+
+    if (!fs.existsSync(venvPython)) {
+      statusMessage += "❌ **Environment**: Python environment missing\n";
+    } else {
+      statusMessage += "✅ **Environment**: Python environment ready\n";
+    }
+
+    // Check indexed versions
+    try {
+      const versionsAvailable = await checkVersionsAvailable();
+      if (versionsAvailable) {
+        const versions = await listAvailableVersions();
+        statusMessage += `✅ **Indexed Data**: ${versions.length} version(s) available\n`;
+        statusMessage += `📦 Versions: ${versions.join(", ")}\n`;
+
+        if (selectedVersion) {
+          statusMessage += `🎯 **Selected**: ${selectedVersion}\n`;
+        } else {
+          statusMessage += `⚠️ **No Version Selected**: Server will use default\n`;
+        }
+
+        statusMessage +=
+          "\n🚀 **Copilot Integration**: Server is registered and discoverable by GitHub Copilot Chat\n";
+        statusMessage +=
+          "💡 The server will start automatically when Copilot Chat needs it\n\n";
+      } else {
+        statusMessage += "❌ **No Indexed Data**: No ZIP files imported\n";
+        statusMessage += "➡️ Use 'Import IFS Cloud ZIP File' to add data\n";
+        statusMessage +=
+          "⚠️ **Not Available**: Server not registered with Copilot (no data to serve)\n\n";
+      }
+    } catch (error) {
+      statusMessage += "❌ **Error**: Unable to check indexed data\n\n";
+    }
+  }
+
+  statusMessage += "📋 **Available Commands**:\n";
+  statusMessage += "• Install IFS Cloud MCP Server\n";
+  statusMessage += "• Import IFS Cloud ZIP File\n";
+  statusMessage += "• Select Version\n";
+  statusMessage += "• Show MCP Server Status & Configuration\n";
+
+  vscode.window.showInformationMessage(statusMessage, { modal: true });
 }
 
 async function configureMcpServer() {
@@ -1323,25 +1550,28 @@ async function configureMcpServer() {
 }
 
 function updateStatusBar() {
-  const mcpRunning = mcpServerProcess !== null && !mcpServerProcess.killed;
   const webUIRunning = webUIProcess !== null && !webUIProcess.killed;
 
-  // Get the selected version to display in status
+  // Get registration status
   const config = vscode.workspace.getConfiguration("ifsCloudMcp");
   const selectedVersion = config.get<string>("selectedVersion");
-  const versionText = selectedVersion ? ` (v:${selectedVersion})` : "";
+  const installationPath = config.get<string>("installationPath");
+
+  const isInstalled = installationPath && fs.existsSync(installationPath);
+  const versionText = selectedVersion ? ` (${selectedVersion})` : "";
 
   let text = "";
   let backgroundColor = undefined;
 
-  if (mcpRunning && webUIRunning) {
-    text = `$(check) MCP: Running${versionText} | Web UI: Running`;
-  } else if (mcpRunning) {
-    text = `$(check) MCP: Running${versionText} | $(circle-slash) Web UI: Stopped`;
-  } else if (webUIRunning) {
-    text = `$(circle-slash) MCP: Stopped | $(check) Web UI: Running${versionText}`;
+  if (isInstalled) {
+    text = `$(robot) MCP: Registered${versionText}`;
+    if (webUIRunning) {
+      text += ` | $(check) Web UI: Running`;
+    } else {
+      text += ` | $(circle-slash) Web UI: Stopped`;
+    }
   } else {
-    text = `$(circle-slash) MCP: Stopped | Web UI: Stopped${versionText}`;
+    text = `$(circle-slash) MCP: Not Installed`;
     backgroundColor = new vscode.ThemeColor("statusBarItem.warningBackground");
   }
 
@@ -1640,6 +1870,100 @@ async function openWebUIInBrowser() {
 
   if (result === "Open Default URL") {
     vscode.env.openExternal(vscode.Uri.parse(defaultUrl));
+  }
+}
+
+async function generateMcpClientConfig() {
+  const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+  const installationPath = config.get<string>("installationPath");
+  const selectedVersion = config.get<string>("selectedVersion");
+
+  if (!installationPath || !fs.existsSync(installationPath)) {
+    vscode.window.showErrorMessage(
+      "MCP Server not installed. Please install the server first using 'IFS Cloud: Install IFS Cloud MCP Server'."
+    );
+    return;
+  }
+
+  // Determine the Python executable
+  const venvPath = path.join(installationPath, ".venv");
+  const venvPython =
+    process.platform === "win32"
+      ? path.join(venvPath, "Scripts", "python.exe")
+      : path.join(venvPath, "bin", "python");
+
+  if (!fs.existsSync(venvPython)) {
+    vscode.window.showErrorMessage(
+      "Virtual environment not found. Please reinstall the server."
+    );
+    return;
+  }
+
+  // Build the command arguments
+  const args = [
+    "-m",
+    "src.ifs_cloud_mcp_server.main",
+    "server",
+    "--transport",
+    "stdio",
+  ];
+  if (selectedVersion) {
+    args.push("--version", selectedVersion);
+  }
+
+  // Check if server is currently running
+  const isRunning = mcpServerProcess !== null && !mcpServerProcess.killed;
+
+  const statusMessage = isRunning
+    ? "✅ MCP Server is currently running and should be discoverable by GitHub Copilot Chat."
+    : "⚠️ MCP Server is not running. Please start it first using 'IFS Cloud: Start IFS Cloud MCP Server'.";
+
+  // Generate VS Code workspace settings for MCP
+  const workspaceConfig = {
+    "mcp.servers": {
+      "ifs-cloud": {
+        command: venvPython,
+        args: args,
+        name: "IFS Cloud MCP Server",
+        description: "AI-powered code intelligence for IFS Cloud development",
+      },
+    },
+  };
+
+  const configJson = JSON.stringify(workspaceConfig, null, 2);
+
+  // Show the configuration and status
+  const document = await vscode.workspace.openTextDocument({
+    content: `// VS Code MCP Server Configuration for IFS Cloud
+// Status: ${statusMessage}
+//
+// This configuration can be added to your VS Code workspace settings
+// if manual registration is needed.
+
+${configJson}
+
+// Command to start server manually:
+// ${venvPython} ${args.join(" ")}`,
+    language: "jsonc",
+  });
+
+  await vscode.window.showTextDocument(document);
+
+  const choice = await vscode.window.showInformationMessage(
+    `IFS Cloud MCP Server Configuration\n\n${statusMessage}\n\n` +
+      "For GitHub Copilot Chat integration:\n" +
+      "1. Ensure the MCP server is running (use 'Start IFS Cloud MCP Server')\n" +
+      "2. The server should be automatically discovered by Copilot Chat\n" +
+      "3. If not working, try restarting VS Code with the server running\n\n" +
+      "The server provides AI-powered suggestions based on your imported IFS Cloud codebase.",
+    isRunning ? "Server Status" : "Start Server",
+    "Close"
+  );
+
+  if (choice === "Start Server" && !isRunning) {
+    await startMcpServer();
+  } else if (choice === "Server Status") {
+    await checkServerRegistrationStatus();
   }
 }
 

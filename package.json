@@ -2,8 +2,11 @@
   "name": "ifs-cloud-mcp-vscode",
   "displayName": "IFS Cloud MCP Server",
   "description": "Transform IFS Cloud development with AI-powered code intelligence. One-click installation, ZIP import workflow, and intelligent analysis of 15,000+ source files.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "sindrelinden",
+  "enabledApiProposals": [
+    "languageModelSystem"
+  ],
   "license": "MIT",
   "icon": "icon.png",
   "author": {
@@ -59,18 +62,8 @@
         "category": "IFS Cloud"
       },
       {
-        "command": "ifs-cloud-mcp.start",
-        "title": "Start IFS Cloud MCP Server",
-        "category": "IFS Cloud"
-      },
-      {
-        "command": "ifs-cloud-mcp.stop",
-        "title": "Stop IFS Cloud MCP Server",
-        "category": "IFS Cloud"
-      },
-      {
         "command": "ifs-cloud-mcp.status",
-        "title": "Check IFS Cloud MCP Server Status",
+        "title": "Check MCP Server Registration Status",
         "category": "IFS Cloud"
       },
       {
@@ -117,6 +110,11 @@
         "command": "ifs-cloud-mcp.openWebUI",
         "title": "Open Web UI in Browser",
         "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.generateConfig",
+        "title": "Show MCP Server Status & Configuration",
+        "category": "IFS Cloud"
       }
     ],
     "menus": {
@@ -129,12 +127,6 @@
         },
         {
           "command": "ifs-cloud-mcp.showInstructions"
-        },
-        {
-          "command": "ifs-cloud-mcp.start"
-        },
-        {
-          "command": "ifs-cloud-mcp.stop"
         },
         {
           "command": "ifs-cloud-mcp.status"
@@ -168,6 +160,12 @@
         }
       ]
     },
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "ifs-cloud.mcp-servers",
+        "label": "IFS Cloud MCP Server"
+      }
+    ],
     "configuration": {
       "title": "IFS Cloud MCP Server",
       "properties": {
