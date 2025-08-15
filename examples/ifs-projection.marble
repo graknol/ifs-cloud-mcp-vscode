@@ -1,0 +1,132 @@
+projection CustomerOrderHandling;
+component ORDER;
+layer Core;
+
+// Example IFS Cloud projection file showing API patterns
+// Based on actual IFS language specification from the codebase
+
+--------------------------------- ENTITIES ----------------------------------
+
+entityset CustomerOrders for CustomerOrder;
+entityset CustomerOrderLines for CustomerOrderLine;
+
+@Override
+entity CustomerOrder {
+   crud = Read, Update, Delete;
+   from = "customer_order";
+   keys = OrderNo;
+   
+   attribute OrderNo Text {
+      maxlength = 12;
+      required = [true];
+   }
+   attribute CustomerNo Text {
+      maxlength = 20;
+      required = [true];
+   }
+   attribute Contract Text {
+      maxlength = 5;
+      required = [true];
+   }
+   attribute WantedDeliveryDate Date;
+   attribute CurrencyCode Text {
+      maxlength = 3;
+   }
+   attribute OrderId Text {
+      maxlength = 50;
+   }
+   attribute State Enumeration(CustomerOrderState) {
+      required = [true];
+   }
+   attribute Objstate Enumeration(CustomerOrderState) {
+      label = "Status";
+   }
+   
+   reference CustomerNoRef(CustomerNo) to CustomerInfo(CustomerNo) {
+      label = "Customer";
+   }
+   reference ContractRef(Contract) to Site(Contract) {
+      label = "Site";
+   }
+   
+   array DetailCustomerOrderLines(OrderNo) to CustomerOrderLine(OrderNo);
+}
+
+entity CustomerOrderLine {
+   crud = Create, Read, Update, Delete;
+   from = "customer_order_line";
+   keys = OrderNo, LineNo, RelNo, LineItemNo;
+   
+   attribute OrderNo Text {
+      maxlength = 12;
+   }
+   attribute LineNo Text {
+      maxlength = 4;
+   }
+   attribute RelNo Text {
+      maxlength = 4;
+   }
+   attribute LineItemNo Number;
+   attribute PartNo Text {
+      maxlength = 25;
+   }
+   attribute BuyQtyDue Number {
+      required = [true];
+   }
+   attribute SalesUnitMeas Text {
+      maxlength = 10;
+   }
+   attribute SaleUnitPrice Number;
+   attribute PlannedDeliveryDate Date;
+   attribute QtyShipped Number;
+   
+   reference PartNoRef(Contract, PartNo) to SalesPart(Contract, PartNo) {
+      label = "Sales Part";
+   }
+   reference OrderNoRef(OrderNo) to CustomerOrder(OrderNo);
+}
+
+-------------------------------- STRUCTURES ---------------------------------
+
+structure CustomerOrderStruct {
+   attribute OrderNo Text;
+   attribute CustomerNo Text;
+   attribute TotalAmount Number;
+   attribute LineCount Number;
+}
+
+------------------------------- ENUMERATIONS --------------------------------
+
+enumeration CustomerOrderState {
+   enumerationtype = Custom;
+   values = "Planned", "Released", "Reserved", "Picked", "PartiallyDelivered", "Delivered", "Invoiced", "Cancelled";
+}
+
+--------------------------------- FUNCTIONS ----------------------------------
+
+function GetOrderSummary Parameter.OrderNoStruct : CustomerOrderStruct {
+   parameter OrderNoStruct {
+      attribute OrderNo Text;
+   }
+}
+
+function CalculateOrderTotal Parameter.OrderCalcStruct : Number {
+   parameter OrderCalcStruct {
+      attribute OrderNo Text;
+      attribute IncludeDiscounts Boolean;
+   }
+}
+
+---------------------------------- ACTIONS -----------------------------------
+
+action ReleaseCustomerOrder {
+   initialcheck implementation;
+   parameter OrderNoList Text;
+}
+
+action PrintOrderConfirmation {
+   initialcheck implementation;
+   ludependencies = CustomerOrder;
+   parameter OrderNo Text;
+   parameter Contract Text;
+}

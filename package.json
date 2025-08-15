@@ -65,6 +65,46 @@
         "command": "ifs-cloud-mcp.configure",
         "title": "Configure IFS Cloud MCP Server",
         "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.selectVersion",
+        "title": "Select IFS Cloud Version",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.listVersions",
+        "title": "List Available Versions",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.troubleshoot",
+        "title": "Troubleshoot Installation",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.startWebUI",
+        "title": "Start Web UI",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.stopWebUI",
+        "title": "Stop Web UI",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.showMcpOutput",
+        "title": "Show MCP Server Output",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.showWebUIOutput",
+        "title": "Show Web UI Output",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.openWebUI",
+        "title": "Open Web UI in Browser",
+        "category": "IFS Cloud"
       }
     ],
     "menus": {
@@ -83,6 +123,30 @@
         },
         {
           "command": "ifs-cloud-mcp.configure"
+        },
+        {
+          "command": "ifs-cloud-mcp.selectVersion"
+        },
+        {
+          "command": "ifs-cloud-mcp.listVersions"
+        },
+        {
+          "command": "ifs-cloud-mcp.troubleshoot"
+        },
+        {
+          "command": "ifs-cloud-mcp.startWebUI"
+        },
+        {
+          "command": "ifs-cloud-mcp.stopWebUI"
+        },
+        {
+          "command": "ifs-cloud-mcp.showMcpOutput"
+        },
+        {
+          "command": "ifs-cloud-mcp.showWebUIOutput"
+        },
+        {
+          "command": "ifs-cloud-mcp.openWebUI"
         }
       ]
     },
@@ -94,10 +158,20 @@
           "default": "",
           "description": "Path to the IFS Cloud MCP Server installation"
         },
+        "ifsCloudMcp.installationPath": {
+          "type": "string",
+          "default": "",
+          "description": "Directory where IFS Cloud MCP Server is installed"
+        },
         "ifsCloudMcp.indexPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the IFS Cloud code index"
+          "description": "Path to the IFS Cloud code index (legacy - use selectedVersion instead)"
+        },
+        "ifsCloudMcp.selectedVersion": {
+          "type": "string",
+          "default": "",
+          "description": "Selected IFS Cloud version for version-based server startup"
         },
         "ifsCloudMcp.autoStart": {
           "type": "boolean",
@@ -105,7 +179,43 @@
           "description": "Automatically start the MCP server when VS Code opens"
         }
       }
-    }
+    },
+    "languages": [
+      {
+        "id": "marble",
+        "aliases": [
+          "IFS Cloud",
+          "marble"
+        ],
+        "extensions": [
+          ".marble",
+          ".client",
+          ".projection",
+          ".fragment"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "marble",
+        "scopeName": "source.marble",
+        "path": "./syntaxes/marble.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "IFS Cloud Marble Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/marble-dark-theme.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "marble",
+        "path": "./snippets/marble.json"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

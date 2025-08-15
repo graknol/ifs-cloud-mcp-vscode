@@ -6,8 +6,11 @@ This VS Code extension provides easy installation and management of the IFS Clou
 
 - **One-click installation** of IFS Cloud MCP Server using UV
 - **Server management** with start/stop commands
+- **Version-based startup** with automatic version selection
 - **Status monitoring** with status bar indicator
 - **Configuration management** for server and index paths
+- **Web UI support** with automatic URL detection
+- **Marble language support** with syntax highlighting and snippets
 - **Auto-start** option for seamless development experience
 
 ## Commands
@@ -17,11 +20,28 @@ This VS Code extension provides easy installation and management of the IFS Clou
 - `IFS Cloud: Stop IFS Cloud MCP Server` - Stop the MCP server
 - `IFS Cloud: Check IFS Cloud MCP Server Status` - Check server status
 - `IFS Cloud: Configure IFS Cloud MCP Server` - Configure server settings
+- `IFS Cloud: Select IFS Cloud Version` - Choose from available indexed versions
+- `IFS Cloud: List Available Versions` - Display all indexed versions
+- `IFS Cloud: Start Web UI` - Launch the web interface
+- `IFS Cloud: Stop Web UI` - Stop the web interface
+
+## Marble Language Support
+
+This extension includes comprehensive support for Marble files:
+
+- **Syntax Highlighting**: Full syntax highlighting for Marble language constructs
+- **Code Snippets**: Pre-built snippets for entities, views, services, and more
+- **Custom Theme**: Dark theme optimized for Marble syntax
+- **Language Features**: Auto-closing pairs, bracket matching, smart indentation
+
+See [MARBLE_LANGUAGE.md](MARBLE_LANGUAGE.md) for detailed information about Marble language support.
 
 ## Configuration
 
 - `ifsCloudMcp.serverPath` - Path to the MCP server executable
-- `ifsCloudMcp.indexPath` - Path to your IFS Cloud code index
+- `ifsCloudMcp.installationPath` - Directory where MCP server is installed
+- `ifsCloudMcp.indexPath` - Path to your IFS Cloud code index (legacy)
+- `ifsCloudMcp.selectedVersion` - Selected IFS Cloud version for version-based startup
 - `ifsCloudMcp.autoStart` - Automatically start server when VS Code opens
 
 ## Requirements

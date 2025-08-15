@@ -1,0 +1,994 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Marble",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#preprocessor"
+    },
+    {
+      "include": "#imports"
+    },
+    {
+      "include": "#namespaces"
+    },
+    {
+      "include": "#annotations"
+    },
+    {
+      "include": "#entity-declarations"
+    },
+    {
+      "include": "#view-declarations"
+    },
+    {
+      "include": "#projection-declarations"
+    },
+    {
+      "include": "#service-declarations"
+    },
+    {
+      "include": "#client-declarations"
+    },
+    {
+      "include": "#api-declarations"
+    },
+    {
+      "include": "#fragment-declarations"
+    },
+    {
+      "include": "#class-declarations"
+    },
+    {
+      "include": "#interface-declarations"
+    },
+    {
+      "include": "#enum-declarations"
+    },
+    {
+      "include": "#type-declarations"
+    },
+    {
+      "include": "#function-declarations"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#template-strings"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#sql-embedded"
+    },
+    {
+      "include": "#linq-expressions"
+    },
+    {
+      "include": "#lambda-expressions"
+    },
+    {
+      "include": "#function-calls"
+    },
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#blocks"
+    },
+    {
+      "include": "#generics"
+    },
+    {
+      "include": "#attributes"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.marble",
+          "begin": "//",
+          "end": "$",
+          "patterns": [
+            {
+              "name": "keyword.other.documentation.marble",
+              "match": "(@param|@return|@throws|@deprecated|@since|@author|@version|@see)\\b"
+            }
+          ]
+        },
+        {
+          "name": "comment.block.documentation.marble",
+          "begin": "/\\*\\*",
+          "end": "\\*/",
+          "patterns": [
+            {
+              "name": "keyword.other.documentation.marble",
+              "match": "(@param|@return|@throws|@deprecated|@since|@author|@version|@see)\\b"
+            }
+          ]
+        },
+        {
+          "name": "comment.block.marble",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.hash.marble",
+          "begin": "#",
+          "end": "$"
+        }
+      ]
+    },
+    "preprocessor": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.marble",
+          "begin": "^\\s*#(if|ifdef|ifndef|elif|else|endif|define|undef|include|pragma)\\b",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.preprocessor.marble"
+            }
+          }
+        }
+      ]
+    },
+    "imports": {
+      "patterns": [
+        {
+          "name": "meta.import.marble",
+          "begin": "\\b(import|using|include|with|from)\\b",
+          "end": ";",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.import.marble"
+            }
+          },
+          "patterns": [
+            {
+              "name": "string.quoted.double.marble",
+              "match": "\"[^\"]*\""
+            },
+            {
+              "name": "entity.name.namespace.marble",
+              "match": "\\b[A-Z][a-zA-Z0-9_]*(?:\\.[A-Z][a-zA-Z0-9_]*)*\\b"
+            }
+          ]
+        }
+      ]
+    },
+    "namespaces": {
+      "patterns": [
+        {
+          "name": "meta.namespace.marble",
+          "begin": "\\b(namespace|module)\\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.namespace.marble"
+            },
+            "2": {
+              "name": "entity.name.namespace.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "entity-declarations": {
+      "patterns": [
+        {
+          "name": "meta.entity.marble",
+          "begin": "\\b(entity)\\s+([A-Z][a-zA-Z0-9_]*)(?:\\s+(extends|inherits)\\s+([A-Z][a-zA-Z0-9_]*))?\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.entity.marble"
+            },
+            "2": {
+              "name": "entity.name.type.entity.marble"
+            },
+            "3": {
+              "name": "keyword.other.extends.marble"
+            },
+            "4": {
+              "name": "entity.other.inherited-class.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#entity-members"
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "entity-members": {
+      "patterns": [
+        {
+          "name": "meta.field.marble",
+          "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*:\\s*([a-zA-Z_][a-zA-Z0-9_<>\\[\\]]*)",
+          "end": ";",
+          "beginCaptures": {
+            "1": {
+              "name": "variable.other.property.marble"
+            },
+            "2": {
+              "name": "storage.type.marble"
+            }
+          }
+        }
+      ]
+    },
+    "view-declarations": {
+      "patterns": [
+        {
+          "name": "meta.view.marble",
+          "begin": "\\b(view)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(from)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.view.marble"
+            },
+            "2": {
+              "name": "entity.name.type.view.marble"
+            },
+            "3": {
+              "name": "keyword.other.from.marble"
+            },
+            "4": {
+              "name": "entity.other.inherited-class.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#view-members"
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "view-members": {
+      "patterns": [
+        {
+          "name": "meta.view-field.marble",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?::\\s*([^,;]+))?[,;]?",
+          "captures": {
+            "1": {
+              "name": "variable.other.property.marble"
+            },
+            "2": {
+              "name": "meta.expression.marble"
+            }
+          }
+        }
+      ]
+    },
+    "projection-declarations": {
+      "patterns": [
+        {
+          "name": "meta.projection.marble",
+          "begin": "\\b(projection)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.projection.marble"
+            },
+            "2": {
+              "name": "entity.name.type.projection.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#fragment-references"
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "fragment-declarations": {
+      "patterns": [
+        {
+          "name": "meta.fragment.marble",
+          "begin": "\\b(fragment)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.fragment.marble"
+            },
+            "2": {
+              "name": "entity.name.type.fragment.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#view-members"
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "fragment-references": {
+      "patterns": [
+        {
+          "name": "meta.fragment-include.marble",
+          "match": "\\b(include)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.control.include.marble"
+            },
+            "2": {
+              "name": "entity.name.type.fragment.marble"
+            }
+          }
+        }
+      ]
+    },
+    "service-declarations": {
+      "patterns": [
+        {
+          "name": "meta.service.marble",
+          "begin": "\\b(service)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.service.marble"
+            },
+            "2": {
+              "name": "entity.name.type.service.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "client-declarations": {
+      "patterns": [
+        {
+          "name": "meta.client.marble",
+          "begin": "\\b(client)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.client.marble"
+            },
+            "2": {
+              "name": "entity.name.type.client.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "api-declarations": {
+      "patterns": [
+        {
+          "name": "meta.api.marble",
+          "begin": "\\b(api)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.api.marble"
+            },
+            "2": {
+              "name": "entity.name.type.api.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "class-declarations": {
+      "patterns": [
+        {
+          "name": "meta.class.marble",
+          "begin": "\\b(class)\\s+([A-Z][a-zA-Z0-9_]*)(?:\\s*<([^>]+)>)?(?:\\s+(extends|inherits)\\s+([A-Z][a-zA-Z0-9_]*(?:<[^>]+>)?))?(?:\\s+(implements)\\s+([A-Z][a-zA-Z0-9_]*(?:\\s*,\\s*[A-Z][a-zA-Z0-9_]*)*))\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.class.marble"
+            },
+            "2": {
+              "name": "entity.name.type.class.marble"
+            },
+            "3": {
+              "name": "entity.other.generic.marble"
+            },
+            "4": {
+              "name": "keyword.other.extends.marble"
+            },
+            "5": {
+              "name": "entity.other.inherited-class.marble"
+            },
+            "6": {
+              "name": "keyword.other.implements.marble"
+            },
+            "7": {
+              "name": "entity.other.inherited-class.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "interface-declarations": {
+      "patterns": [
+        {
+          "name": "meta.interface.marble",
+          "begin": "\\b(interface)\\s+([A-Z][a-zA-Z0-9_]*)(?:\\s*<([^>]+)>)?(?:\\s+(extends)\\s+([A-Z][a-zA-Z0-9_]*(?:\\s*,\\s*[A-Z][a-zA-Z0-9_]*)*))\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.interface.marble"
+            },
+            "2": {
+              "name": "entity.name.type.interface.marble"
+            },
+            "3": {
+              "name": "entity.other.generic.marble"
+            },
+            "4": {
+              "name": "keyword.other.extends.marble"
+            },
+            "5": {
+              "name": "entity.other.inherited-class.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "enum-declarations": {
+      "patterns": [
+        {
+          "name": "meta.enum.marble",
+          "begin": "\\b(enum)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.enum.marble"
+            },
+            "2": {
+              "name": "entity.name.type.enum.marble"
+            }
+          },
+          "patterns": [
+            {
+              "name": "meta.enum-member.marble",
+              "match": "\\b([A-Z_][A-Z0-9_]*)\\s*(?:=\\s*([^,}]+))?",
+              "captures": {
+                "1": {
+                  "name": "variable.other.enummember.marble"
+                },
+                "2": {
+                  "name": "constant.other.marble"
+                }
+              }
+            },
+            {
+              "include": "#comments"
+            }
+          ]
+        }
+      ]
+    },
+    "type-declarations": {
+      "patterns": [
+        {
+          "name": "meta.typedef.marble",
+          "match": "\\b(type)\\s+([A-Z][a-zA-Z0-9_]*)\\s*=\\s*([^;]+);",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.type.marble"
+            },
+            "2": {
+              "name": "entity.name.type.alias.marble"
+            },
+            "3": {
+              "name": "storage.type.marble"
+            }
+          }
+        }
+      ]
+    },
+    "function-declarations": {
+      "patterns": [
+        {
+          "name": "meta.function.marble",
+          "begin": "\\b(async\\s+)?(function|method|procedure)\\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\\s*<([^>]+)>)?\\s*\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.async.marble"
+            },
+            "2": {
+              "name": "keyword.declaration.function.marble"
+            },
+            "3": {
+              "name": "entity.name.function.marble"
+            },
+            "4": {
+              "name": "entity.other.generic.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#function-parameters"
+            }
+          ]
+        }
+      ]
+    },
+    "function-parameters": {
+      "patterns": [
+        {
+          "name": "meta.parameter.marble",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*:\\s*([a-zA-Z_][a-zA-Z0-9_<>\\[\\]?]*)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.marble"
+            },
+            "2": {
+              "name": "storage.type.marble"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.marble",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.marble",
+              "match": "\\\\."
+            },
+            {
+              "name": "constant.other.placeholder.marble",
+              "match": "\\{[^}]*\\}"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.marble",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.marble",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.triple.marble",
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.marble",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "template-strings": {
+      "patterns": [
+        {
+          "name": "string.template.marble",
+          "begin": "\\$\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "meta.interpolation.marble",
+              "begin": "\\{",
+              "end": "\\}",
+              "patterns": [
+                {
+                  "include": "$self"
+                }
+              ]
+            },
+            {
+              "name": "constant.character.escape.marble",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "sql-embedded": {
+      "patterns": [
+        {
+          "name": "meta.embedded.sql.marble",
+          "begin": "\\b(sql|SQL)\\s*\"\"\"",
+          "end": "\"\"\"",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.sql.marble"
+            }
+          },
+          "patterns": [
+            {
+              "name": "source.sql",
+              "match": ".*"
+            }
+          ]
+        }
+      ]
+    },
+    "linq-expressions": {
+      "patterns": [
+        {
+          "name": "meta.linq.marble",
+          "begin": "\\b(from)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s+(in)\\s+",
+          "end": "(?=;|})",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.linq.marble"
+            },
+            "2": {
+              "name": "variable.other.marble"
+            },
+            "3": {
+              "name": "keyword.other.linq.marble"
+            }
+          },
+          "patterns": [
+            {
+              "name": "keyword.other.linq.marble",
+              "match": "\\b(select|where|orderby|groupby|join|let|into)\\b"
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "lambda-expressions": {
+      "patterns": [
+        {
+          "name": "meta.lambda.marble",
+          "begin": "\\(([^)]*)\\)\\s*=>",
+          "end": "(?=[;,})])",
+          "beginCaptures": {
+            "1": {
+              "name": "variable.parameter.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.lambda.simple.marble",
+          "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*=>",
+          "end": "(?=[;,})])",
+          "beginCaptures": {
+            "1": {
+              "name": "variable.parameter.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.marble",
+          "match": "\\b(if|else|elif|endif|while|for|foreach|do|loop|break|continue|return|yield|try|catch|finally|throw|switch|case|default|when|unless|goto|label)\\b"
+        },
+        {
+          "name": "keyword.declaration.marble",
+          "match": "\\b(entity|view|projection|fragment|client|api|service|procedure|function|method|class|interface|struct|enum|type|namespace|module|import|export|include|using|with|from|select|where|orderby|groupby)\\b"
+        },
+        {
+          "name": "keyword.modifier.marble",
+          "match": "\\b(public|private|protected|internal|static|readonly|const|virtual|override|abstract|sealed|partial|async|await|extern|unsafe|volatile|ref|out|in|params|event|delegate|operator)\\b"
+        },
+        {
+          "name": "keyword.operator.marble",
+          "match": "\\b(and|or|not|is|as|typeof|sizeof|new|delete|this|base|super|self|null|undefined|true|false)\\b"
+        },
+        {
+          "name": "storage.type.primitive.marble",
+          "match": "\\b(string|int|integer|long|short|byte|bool|boolean|float|double|decimal|char|void|object|any|var|let|const|Date|DateTime|Time|Guid|UUID)\\b"
+        },
+        {
+          "name": "storage.type.generic.marble",
+          "match": "\\b(List|Array|Dictionary|Map|Set|Collection|IEnumerable|IList|IDictionary|Promise|Task|Future|Optional|Maybe)\\b"
+        }
+      ]
+    },
+    "function-calls": {
+      "patterns": [
+        {
+          "name": "meta.function-call.marble",
+          "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.call.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.parameter.marble",
+          "match": "\\$[a-zA-Z_][a-zA-Z0-9_]*"
+        },
+        {
+          "name": "variable.other.reference.marble",
+          "match": "&[a-zA-Z_][a-zA-Z0-9_]*"
+        },
+        {
+          "name": "variable.other.global.marble",
+          "match": "@@[a-zA-Z_][a-zA-Z0-9_]*"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.decimal.marble",
+          "match": "\\b\\d+\\.\\d+([eE][+-]?\\d+)?[fFdDmM]?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.marble",
+          "match": "\\b\\d+[lLfFdDmM]?\\b"
+        },
+        {
+          "name": "constant.numeric.hex.marble",
+          "match": "\\b0[xX][0-9a-fA-F]+[lL]?\\b"
+        },
+        {
+          "name": "constant.numeric.binary.marble",
+          "match": "\\b0[bB][01]+[lL]?\\b"
+        },
+        {
+          "name": "constant.numeric.octal.marble",
+          "match": "\\b0[oO][0-7]+[lL]?\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.marble",
+          "match": "=|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|\\?\\?="
+        },
+        {
+          "name": "keyword.operator.comparison.marble",
+          "match": "==|!=|<|>|<=|>=|<>|===|!=="
+        },
+        {
+          "name": "keyword.operator.logical.marble",
+          "match": "&&|\\|\\||!|\\band\\b|\\bor\\b|\\bnot\\b"
+        },
+        {
+          "name": "keyword.operator.arithmetic.marble",
+          "match": "\\+|-|\\*|/|%|\\+\\+|--|\\*\\*"
+        },
+        {
+          "name": "keyword.operator.bitwise.marble",
+          "match": "&|\\||\\^|~|<<|>>"
+        },
+        {
+          "name": "keyword.operator.ternary.marble",
+          "match": "\\?|:"
+        },
+        {
+          "name": "keyword.operator.null-coalescing.marble",
+          "match": "\\?\\?|\\?\\."
+        },
+        {
+          "name": "keyword.operator.lambda.marble",
+          "match": "=>"
+        },
+        {
+          "name": "keyword.operator.other.marble",
+          "match": "\\.|->|::|\\.\\.\\.|\\.\\.="
+        }
+      ]
+    },
+    "blocks": {
+      "patterns": [
+        {
+          "name": "meta.block.marble",
+          "begin": "\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.brackets.marble",
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.parens.marble",
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "generics": {
+      "patterns": [
+        {
+          "name": "meta.generic.marble",
+          "begin": "<",
+          "end": ">",
+          "patterns": [
+            {
+              "name": "entity.other.generic.marble",
+              "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+            },
+            {
+              "name": "keyword.operator.constraint.marble",
+              "match": "\\b(where|extends|super)\\b"
+            },
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "annotations": {
+      "patterns": [
+        {
+          "name": "meta.annotation.marble",
+          "begin": "@([a-zA-Z_][a-zA-Z0-9_]*)",
+          "end": "(?=[^(])|(?<=\\))",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.annotation.marble"
+            }
+          },
+          "patterns": [
+            {
+              "name": "meta.annotation.parameters.marble",
+              "begin": "\\(",
+              "end": "\\)",
+              "patterns": [
+                {
+                  "include": "$self"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "name": "meta.attribute.marble",
+          "begin": "\\[([a-zA-Z_][a-zA-Z0-9_]*)",
+          "end": "\\]",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.attribute.marble"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.marble",
+          "match": "\\b(true|false|null|undefined|nil|void|NaN|Infinity)\\b"
+        },
+        {
+          "name": "variable.other.constant.marble",
+          "match": "\\b[A-Z][A-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "entity.name.type.marble",
+          "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other.marble",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.marble"
+}

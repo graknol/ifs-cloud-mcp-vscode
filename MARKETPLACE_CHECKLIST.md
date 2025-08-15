@@ -26,6 +26,7 @@
 ### 📋 **Required Fixes:**
 
 #### 1. **Add Publisher to package.json**
+
 ```json
 {
   "publisher": "your-publisher-name",
@@ -35,10 +36,12 @@
 ```
 
 #### 2. **Add Icon**
+
 - Create 128x128 PNG icon
 - Add to package.json: `"icon": "icon.png"`
 
 #### 3. **Add Keywords**
+
 ```json
 {
   "keywords": [
@@ -56,6 +59,7 @@
 ```
 
 #### 4. **Fix Repository URL**
+
 ```json
 {
   "repository": {
@@ -66,6 +70,7 @@
 ```
 
 #### 5. **Add Gallery Banner (Optional)**
+
 ```json
 {
   "galleryBanner": {
@@ -78,15 +83,18 @@
 ### 📝 **Publishing Process:**
 
 1. **Create Publisher Account**:
+
    - Go to [Visual Studio Marketplace](https://marketplace.visualstudio.com/manage)
    - Sign in with Microsoft/GitHub account
    - Create publisher profile
 
 2. **Get Personal Access Token**:
+
    - Go to [Azure DevOps](https://dev.azure.com)
    - Create Personal Access Token with "Marketplace" scope
 
 3. **Login to VSCE**:
+
    ```bash
    vsce login your-publisher-name
    ```
@@ -108,7 +116,7 @@
 **Ready for Publishing**: ❌ **NO** - Missing critical fields  
 **Technical Quality**: ✅ **YES** - Code is production-ready  
 **Documentation**: ✅ **YES** - Complete documentation  
-**Licensing**: ✅ **YES** - MIT licensed  
+**Licensing**: ✅ **YES** - MIT licensed
 
 ### 🚀 **Next Steps:**
 

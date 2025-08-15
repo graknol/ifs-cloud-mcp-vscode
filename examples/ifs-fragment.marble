@@ -1,0 +1,179 @@
+fragment OrderManagement;
+component ORDER;
+layer Core;
+description "Fragment for order management components";
+
+--------------------------------- FRAGMENTS ---------------------------------
+
+
+----------------------------- CLIENT FRAGMENTS ------------------------------
+
+selector CustomerOrderSelector for CustomerOrder {
+   label = "${OrderNo} - ${CustomerNo}";
+   static OrderNo;
+   static CustomerNo;
+   static State;
+}
+
+group CustomerOrderGroup for CustomerOrder {
+   label = "Customer Order Header";
+   field OrderNo {
+      size = Small;
+   }
+   field CustomerNo {
+      size = Small;
+   }
+   field Contract {
+      size = Small;
+   }
+   field WantedDeliveryDate;
+   field CurrencyCode {
+      size = Small;
+   }
+   field OrderId {
+      editable = [ETag = null];
+   }
+}
+
+list CustomerOrderLinesList for CustomerOrderLine {
+   label = "Order Lines";
+   lov PartNoRef with SalesPartLovSelector {
+      editable = [ETag = null];
+      validate command {
+         execute {
+            set SalesUnitMeas = PartNoRef.SalesUnitMeas;
+         }
+      }
+   }
+   field LineNo {
+      size = Small;
+   }
+   field BuyQtyDue;
+   field SalesUnitMeas {
+      size = Small;
+   }
+   field SaleUnitPrice;
+   field PlannedDeliveryDate;
+
+   commandgroup CommandGroup {
+      label = "Command Group";
+      command CmdReserve;
+   }
+}
+
+command CmdRelease for CustomerOrder {
+   label = "Release";
+   mode = SelectedRecords;
+   enabled = [State in ("Planned", "Released")];
+   execute {
+      call ReleaseCustomerOrder(Selection);
+      refresh;
+   }
+}
+
+command CmdReserve for CustomerOrderLine {
+   label = "Reserve";
+   enabled = [QtyShipped < BuyQtyDue];
+   execute {
+      call ReserveOrderLine(OrderNo, LineNo, RelNo, LineItemNo);
+      refresh;
+   }
+}
+
+--------------------------- PROJECTION FRAGMENTS ----------------------------
+
+@Override
+entity CustomerOrder {
+   crud = Read, Update, Delete;
+   from = "customer_order";
+   keys = OrderNo;
+   
+   attribute OrderNo Text {
+      maxlength = 12;
+      required = [true];
+   }
+   attribute CustomerNo Text {
+      maxlength = 20;
+      required = [true];
+   }
+   attribute Contract Text {
+      maxlength = 5;
+      required = [true];
+   }
+   attribute WantedDeliveryDate Date;
+   attribute CurrencyCode Text {
+      maxlength = 3;
+   }
+   attribute OrderId Text {
+      maxlength = 50;
+   }
+   attribute State Enumeration(CustomerOrderState) {
+      required = [true];
+   }
+   
+   reference CustomerNoRef(CustomerNo) to CustomerInfo(CustomerNo) {
+      label = "Customer";
+   }
+   reference ContractRef(Contract) to Site(Contract) {
+      label = "Site";
+   }
+   
+   array DetailCustomerOrderLines(OrderNo) to CustomerOrderLine(OrderNo);
+}
+
+entity CustomerOrderLine {
+   crud = Create, Read, Update, Delete;
+   from = "customer_order_line";
+   keys = OrderNo, LineNo, RelNo, LineItemNo;
+   
+   attribute OrderNo Text {
+      maxlength = 12;
+   }
+   attribute LineNo Text {
+      maxlength = 4;
+   }
+   attribute RelNo Text {
+      maxlength = 4;
+   }
+   attribute LineItemNo Number;
+   attribute PartNo Text {
+      maxlength = 25;
+   }
+   attribute BuyQtyDue Number {
+      required = [true];
+   }
+   attribute SalesUnitMeas Text {
+      maxlength = 10;
+   }
+   attribute SaleUnitPrice Number;
+   attribute PlannedDeliveryDate Date;
+   attribute QtyShipped Number;
+   
+   reference PartNoRef(Contract, PartNo) to SalesPart(Contract, PartNo) {
+      label = "Sales Part";
+   }
+   reference OrderNoRef(OrderNo) to CustomerOrder(OrderNo);
+}
+
+structure CustomerOrderStruct {
+   attribute OrderNo Text;
+   attribute CustomerNo Text;
+   attribute TotalAmount Number;
+   attribute LineCount Number;
+}
+
+enumeration CustomerOrderState {
+   enumerationtype = Custom;
+   values = "Planned", "Released", "Reserved", "Picked", "PartiallyDelivered", "Delivered", "Invoiced", "Cancelled";
+}
+
+function GetOrderSummary Parameter.OrderNoStruct : CustomerOrderStruct {
+   parameter OrderNoStruct {
+      attribute OrderNo Text;
+   }
+}
+
+action ReleaseCustomerOrder {
+   initialcheck implementation;
+   parameter OrderNoList Text;
+}

@@ -1,0 +1,109 @@
+client CustomerOrder;
+component ORDER;
+layer Core;
+
+// Example IFS Cloud client file based on real specification
+// This demonstrates the actual IFS language syntax patterns found in the codebase
+
+-------------------------------- MAIN PAGES ---------------------------------
+
+page Form using CustomerOrders {
+   label = "Customer Orders";
+   selector CustomerOrderSelector;
+   group CustomerOrderGroup;
+   list CustomerOrderLines(DetailCustomerOrderLines);
+
+   commandgroup CommandGroup {
+      command CmdRelease;
+      command CmdPrint;
+   }
+}
+
+--------------------------------- SELECTORS ---------------------------------
+
+@Override
+selector CustomerOrderSelector for CustomerOrder {
+   label = "${OrderNo} - ${CustomerNo}";
+   static OrderNo;
+   static CustomerNo;
+   static State;
+}
+
+---------------------------------- GROUPS -----------------------------------
+
+group CustomerOrderGroup for CustomerOrder {
+   label = "Customer Order Header";
+   field OrderNo {
+      size = Small;
+   }
+   field CustomerNo {
+      size = Small;
+   }
+   field Contract {
+      size = Small;
+   }
+   field WantedDeliveryDate;
+   field CurrencyCode {
+      size = Small;
+   }
+   field OrderId {
+      editable = [ETag = null];
+   }
+}
+
+----------------------------------- LISTS -----------------------------------
+
+list CustomerOrderLines for CustomerOrderLine {
+   label = "Order Lines";
+   lov PartNoRef with SalesPartLovSelector {
+      editable = [ETag = null];
+      validate command {
+         execute {
+            set SalesUnitMeas = PartNoRef.SalesUnitMeas;
+         }
+      }
+   }
+   field LineNo {
+      size = Small;
+   }
+   field BuyQtyDue;
+   field SalesUnitMeas {
+      size = Small;
+   }
+   field SaleUnitPrice;
+   field PlannedDeliveryDate;
+
+   commandgroup CommandGroup {
+      label = "Command Group";
+      command CmdReserve;
+   }
+}
+
+--------------------------------- COMMANDS ----------------------------------
+
+command CmdRelease for CustomerOrder {
+   label = "Release";
+   mode = SelectedRecords;
+   enabled = [State in ("Planned", "Released")];
+   execute {
+      call ReleaseCustomerOrder(Selection);
+      refresh;
+   }
+}
+
+command CmdPrint for CustomerOrder {
+   label = "Print Order Confirmation";
+   enabled = [State != "Cancelled"];
+   execute {
+      call PrintOrderConfirmation(OrderNo, Contract);
+   }
+}
+
+command CmdReserve for CustomerOrderLine {
+   label = "Reserve";
+   enabled = [QtyShipped < BuyQtyDue];
+   execute {
+      call ReserveOrderLine(OrderNo, LineNo, RelNo, LineItemNo);
+      refresh;
+   }
+}

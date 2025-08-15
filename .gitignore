@@ -67,3 +67,5 @@ logs
 # Temporary files
 *.tmp
 *.temp
+
+_work/

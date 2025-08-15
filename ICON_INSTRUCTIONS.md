@@ -5,16 +5,19 @@
 Use any of these tools to convert `icon.svg` to `icon.png` (128x128):
 
 ### Online Converters:
+
 - [CloudConvert](https://cloudconvert.com/svg-to-png)
 - [Convertio](https://convertio.co/svg-png/)
 - [Online-Convert](https://image.online-convert.com/convert-to-png)
 
 ### Command Line (if you have ImageMagick):
+
 ```bash
 magick icon.svg -resize 128x128 icon.png
 ```
 
 ### Using Inkscape:
+
 ```bash
 inkscape icon.svg --export-filename=icon.png --export-width=128 --export-height=128
 ```
@@ -37,6 +40,7 @@ If you can't create a PNG right now, you can temporarily remove the icon field f
 ## Current Icon Design:
 
 The SVG includes:
+
 - Blue gradient background (IFS Cloud colors)
 - "IFS" text at top
 - Cloud symbol in middle
