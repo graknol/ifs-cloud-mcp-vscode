@@ -3,6 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { exec, spawn, ChildProcess } from "child_process";
 import { promisify } from "util";
+import * as os from "os";
 
 let mcpServerProcess: ChildProcess | null = null;
 let webUIProcess: ChildProcess | null = null;
@@ -13,6 +14,54 @@ let webUIOutputChannel: vscode.OutputChannel;
 let mcpServerProvider: IfsCloudMcpServerProvider | null = null;
 
 const execAsync = promisify(exec);
+
+/**
+ * Get the appdata directory where IFS Cloud MCP server stores indexed data
+ */
+function getAppdataPath(): string {
+  if (process.platform === "win32") {
+    return path.join(
+      process.env.APPDATA || os.homedir(),
+      "ifs_cloud_mcp_server"
+    );
+  } else {
+    // For non-Windows systems, use a similar location
+    return path.join(os.homedir(), ".ifs_cloud_mcp_server");
+  }
+}
+
+/**
+ * Check for existing versions directly in the appdata directory
+ */
+function checkAppdataVersions(): string[] {
+  try {
+    const appdataPath = getAppdataPath();
+    const indexesPath = path.join(appdataPath, "indexes");
+
+    if (!fs.existsSync(indexesPath)) {
+      return [];
+    }
+
+    const versions: string[] = [];
+    const entries = fs.readdirSync(indexesPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name !== "latest") {
+        // Check if this version directory has actual index files
+        const versionPath = path.join(indexesPath, entry.name);
+        const files = fs.readdirSync(versionPath);
+        if (files.length > 0) {
+          versions.push(entry.name);
+        }
+      }
+    }
+
+    return versions.sort();
+  } catch (error) {
+    console.log("Error checking appdata versions:", error);
+    return [];
+  }
+}
 
 // Create a better subprocess function for real-time output capture
 function createSubprocess(
@@ -528,10 +577,14 @@ async function listAvailableVersions(): Promise<string[]> {
     const installationPath = config.get<string>("installationPath");
 
     if (!installationPath || !fs.existsSync(installationPath)) {
-      vscode.window.showErrorMessage(
-        "MCP Server not installed. Please install the server first."
-      );
-      return [];
+      // If server isn't installed, check appdata directly as fallback
+      const appdataVersions = checkAppdataVersions();
+      if (appdataVersions.length === 0) {
+        vscode.window.showErrorMessage(
+          "MCP Server not installed. Please install the server first."
+        );
+      }
+      return appdataVersions;
     }
 
     // Use the virtual environment Python
@@ -542,10 +595,14 @@ async function listAvailableVersions(): Promise<string[]> {
         : path.join(venvPath, "bin", "python");
 
     if (!fs.existsSync(venvPython)) {
-      vscode.window.showErrorMessage(
-        "Virtual environment not found. Please reinstall the server."
-      );
-      return [];
+      // If venv Python doesn't exist, check appdata directly as fallback
+      const appdataVersions = checkAppdataVersions();
+      if (appdataVersions.length === 0) {
+        vscode.window.showErrorMessage(
+          "Virtual environment not found. Please reinstall the server."
+        );
+      }
+      return appdataVersions;
     }
 
     // Execute the list command with JSON output
@@ -559,18 +616,28 @@ async function listAvailableVersions(): Promise<string[]> {
         return versionData.versions || [];
       } catch (parseError) {
         console.error("Failed to parse version list JSON:", parseError);
-        vscode.window.showErrorMessage(
-          "Failed to parse version list from server."
-        );
-        return [];
+        // If server command fails, check appdata directly as fallback
+        const appdataVersions = checkAppdataVersions();
+        if (appdataVersions.length === 0) {
+          vscode.window.showErrorMessage(
+            "Failed to parse version list from server."
+          );
+        }
+        return appdataVersions;
       }
     }
 
-    return [];
+    // If no server output, check appdata directly as fallback
+    const appdataVersions = checkAppdataVersions();
+    return appdataVersions;
   } catch (error) {
     console.error("Failed to list versions:", error);
-    vscode.window.showErrorMessage(`Failed to list versions: ${error}`);
-    return [];
+    // If any error occurs, check appdata directly as fallback
+    const appdataVersions = checkAppdataVersions();
+    if (appdataVersions.length === 0) {
+      vscode.window.showErrorMessage(`Failed to list versions: ${error}`);
+    }
+    return appdataVersions;
   }
 }
 
@@ -599,12 +666,16 @@ async function checkVersionsAvailable(): Promise<boolean> {
     const installationPath = config.get<string>("installationPath");
 
     if (!installationPath || !fs.existsSync(installationPath)) {
-      return false;
+      // If server isn't installed, check appdata directly as fallback
+      const appdataVersions = checkAppdataVersions();
+      return appdataVersions.length > 0;
     }
 
     const pythonExecutable = await findPythonExecutable();
     if (!pythonExecutable) {
-      return false;
+      // If no Python, check appdata directly as fallback
+      const appdataVersions = checkAppdataVersions();
+      return appdataVersions.length > 0;
     }
 
     const venvPath = path.join(installationPath, ".venv");
@@ -614,7 +685,9 @@ async function checkVersionsAvailable(): Promise<boolean> {
         : path.join(venvPath, "bin", "python");
 
     if (!fs.existsSync(venvPython)) {
-      return false;
+      // If venv Python doesn't exist, check appdata directly as fallback
+      const appdataVersions = checkAppdataVersions();
+      return appdataVersions.length > 0;
     }
 
     const listResult = await executeCommand(
@@ -626,13 +699,19 @@ async function checkVersionsAvailable(): Promise<boolean> {
         const versions = JSON.parse(listResult.output);
         return versions && versions.length > 0;
       } catch {
-        return false;
+        // If server command fails, check appdata directly as fallback
+        const appdataVersions = checkAppdataVersions();
+        return appdataVersions.length > 0;
       }
     }
 
-    return false;
+    // If server command fails, check appdata directly as fallback
+    const appdataVersions = checkAppdataVersions();
+    return appdataVersions.length > 0;
   } catch (error) {
-    return false;
+    // If any error occurs, check appdata directly as fallback
+    const appdataVersions = checkAppdataVersions();
+    return appdataVersions.length > 0;
   }
 }
 
@@ -914,9 +993,89 @@ async function installMcpServer() {
               message: "Existing installation detected...",
             });
 
-            // Show dialog asking if user wants to overwrite
+            // Check if indexed data exists
+            const indexedDataExists = await checkVersionsAvailable();
+            let dialogMessage = `An existing IFS Cloud MCP Server installation was found at:\n${installDir}\n\n`;
+
+            if (indexedDataExists) {
+              const versions = await listAvailableVersions();
+              dialogMessage += `⚠️ IMPORTANT: This installation contains indexed data for ${
+                versions.length
+              } version(s): ${versions.join(", ")}\n\n`;
+              dialogMessage += `Choose how to proceed:`;
+
+              const preserveResult = await vscode.window.showWarningMessage(
+                dialogMessage,
+                { modal: true },
+                "Update & Preserve Data",
+                "Fresh Install (Lose Data)",
+                "Cancel"
+              );
+
+              if (preserveResult === "Cancel") {
+                vscode.window.showInformationMessage("Installation cancelled.");
+                return;
+              } else if (preserveResult === "Update & Preserve Data") {
+                // Preserve indexed data by backing it up temporarily
+                progress.report({
+                  increment: 10,
+                  message: "Backing up indexed data...",
+                });
+
+                const backupDir = path.join(
+                  homeDir,
+                  ".ifs-cloud-mcp-server-backup"
+                );
+                const indexDir = path.join(installDir, "index");
+
+                // Create backup of index directory if it exists
+                if (fs.existsSync(indexDir)) {
+                  const backupResult = await executeCommand(
+                    process.platform === "win32"
+                      ? `xcopy "${indexDir}" "${backupDir}" /E /I /Y`
+                      : `cp -r "${indexDir}" "${backupDir}"`
+                  );
+
+                  if (!backupResult.success) {
+                    vscode.window.showErrorMessage(
+                      `Failed to backup indexed data: ${backupResult.error}`
+                    );
+                    return;
+                  }
+                }
+
+                // Remove old installation but preserve backup
+                progress.report({
+                  increment: 10,
+                  message: "Updating installation...",
+                });
+
+                const removeResult = await executeCommand(
+                  process.platform === "win32"
+                    ? `rmdir /s /q "${installDir}"`
+                    : `rm -rf "${installDir}"`
+                );
+
+                // Continue with fresh installation, then restore data
+                await installFreshAndRestore(
+                  installDir,
+                  backupDir,
+                  progress,
+                  pythonExecutable
+                );
+                return;
+              } else {
+                // Fresh install - user chose to lose data
+                dialogMessage =
+                  "This will permanently delete all indexed data. Continue?";
+              }
+            } else {
+              dialogMessage += "Do you want to overwrite it?";
+            }
+
+            // Show dialog asking if user wants to overwrite (for fresh install path)
             const overwriteResult = await vscode.window.showWarningMessage(
-              `An existing IFS Cloud MCP Server installation was found at:\n${installDir}\n\nDo you want to overwrite it?`,
+              dialogMessage,
               { modal: true },
               "Overwrite",
               "Cancel"
@@ -933,13 +1092,16 @@ async function installMcpServer() {
               increment: 10,
               message: "Removing existing installation...",
             });
+
+            // Remove existing installation for fresh install
+            const removeResult = await executeCommand(
+              process.platform === "win32"
+                ? `rmdir /s /q "${installDir}"`
+                : `rm -rf "${installDir}"`
+            );
           }
 
-          // Remove existing installation if it exists (after user confirmation)
-          const removeResult = await executeCommand(
-            `rmdir /s /q "${installDir}" 2>nul || rm -rf "${installDir}" 2>/dev/null || true`
-          );
-
+          // Continue with fresh installation
           progress.report({ increment: 40, message: "Cloning repository..." });
 
           // Clone the repository
@@ -1048,6 +1210,140 @@ async function installMcpServer() {
     }
   } catch (error) {
     vscode.window.showErrorMessage(`Installation error: ${error}`);
+  }
+}
+
+// Helper function to install fresh and restore indexed data
+async function installFreshAndRestore(
+  installDir: string,
+  backupDir: string,
+  progress: vscode.Progress<{ message?: string; increment?: number }>,
+  pythonExecutable: string
+) {
+  const path = require("path");
+
+  try {
+    progress.report({ increment: 40, message: "Cloning repository..." });
+
+    // Clone the repository
+    const cloneResult = await executeCommand(
+      `git clone https://github.com/graknol/ifs-cloud-core-mcp-server.git "${installDir}"`
+    );
+
+    if (!cloneResult.success) {
+      vscode.window.showErrorMessage(
+        `Failed to clone repository: ${cloneResult.error}`
+      );
+      return;
+    }
+
+    progress.report({
+      increment: 50,
+      message: "Creating virtual environment...",
+    });
+
+    // Create virtual environment
+    const venvPath = path.join(installDir, ".venv");
+    const createVenvResult = await executeCommand(
+      `cd "${installDir}" && ${pythonExecutable} -m venv .venv`
+    );
+
+    if (!createVenvResult.success) {
+      vscode.window.showErrorMessage(
+        `Failed to create virtual environment: ${createVenvResult.error}`
+      );
+      return;
+    }
+
+    progress.report({
+      increment: 60,
+      message: "Installing Python dependencies...",
+    });
+
+    // Determine the virtual environment Python executable
+    const venvPython =
+      process.platform === "win32"
+        ? path.join(venvPath, "Scripts", "python.exe")
+        : path.join(venvPath, "bin", "python");
+
+    // Install dependencies in virtual environment
+    const installDepsResult = await executeCommand(
+      `cd "${installDir}" && "${venvPython}" -m pip install -e .`
+    );
+
+    if (!installDepsResult.success) {
+      vscode.window.showErrorMessage(
+        `Failed to install dependencies: ${installDepsResult.error}`
+      );
+      return;
+    }
+
+    progress.report({
+      increment: 70,
+      message: "Restoring indexed data...",
+    });
+
+    // Restore indexed data from backup
+    const indexDir = path.join(installDir, "index");
+    if (fs.existsSync(backupDir)) {
+      const restoreResult = await executeCommand(
+        process.platform === "win32"
+          ? `xcopy "${backupDir}" "${indexDir}" /E /I /Y`
+          : `cp -r "${backupDir}" "${indexDir}"`
+      );
+
+      if (restoreResult.success) {
+        // Clean up backup
+        await executeCommand(
+          process.platform === "win32"
+            ? `rmdir /s /q "${backupDir}"`
+            : `rm -rf "${backupDir}"`
+        );
+
+        progress.report({
+          increment: 80,
+          message: "Indexed data restored successfully!",
+        });
+      } else {
+        vscode.window.showWarningMessage(
+          `Warning: Failed to restore indexed data: ${restoreResult.error}`
+        );
+      }
+    }
+
+    progress.report({
+      increment: 90,
+      message: "Updating configuration...",
+    });
+
+    // Update configuration
+    const config = vscode.workspace.getConfiguration("ifsCloudMcp");
+    await config.update(
+      "installationPath",
+      installDir,
+      vscode.ConfigurationTarget.Global
+    );
+
+    progress.report({
+      increment: 100,
+      message: "Installation complete with data preserved!",
+    });
+
+    vscode.window.showInformationMessage(
+      `IFS Cloud MCP Server updated successfully! Your indexed data has been preserved.`
+    );
+
+    // Refresh MCP provider
+    if (mcpServerProvider) {
+      mcpServerProvider.refresh();
+      console.log(
+        "IFS Cloud MCP: Provider refreshed after installation with data preservation"
+      );
+    }
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Installation with data preservation failed: ${error}`
+    );
   }
 }
 
