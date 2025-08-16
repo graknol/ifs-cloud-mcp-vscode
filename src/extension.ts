@@ -20,10 +20,12 @@ const execAsync = promisify(exec);
  */
 function getAppdataPath(): string {
   if (process.platform === "win32") {
-    return path.join(
-      process.env.APPDATA || os.homedir(),
-      "ifs_cloud_mcp_server"
+    const appdata = process.env.APPDATA || os.homedir();
+    const fullPath = path.join(appdata, "ifs_cloud_mcp_server");
+    console.log(
+      `Windows appdata path: ${fullPath} (APPDATA=${process.env.APPDATA})`
     );
+    return fullPath;
   } else {
     // For non-Windows systems, use a similar location
     return path.join(os.homedir(), ".ifs_cloud_mcp_server");
@@ -36,26 +38,36 @@ function getAppdataPath(): string {
 function checkAppdataVersions(): string[] {
   try {
     const appdataPath = getAppdataPath();
+    console.log(`Checking appdata path: ${appdataPath}`);
     const indexesPath = path.join(appdataPath, "indexes");
+    console.log(`Checking indexes path: ${indexesPath}`);
 
     if (!fs.existsSync(indexesPath)) {
+      console.log(`Indexes path does not exist: ${indexesPath}`);
       return [];
     }
 
     const versions: string[] = [];
     const entries = fs.readdirSync(indexesPath, { withFileTypes: true });
+    console.log(
+      `Found entries in indexes: ${entries.map((e) => e.name).join(", ")}`
+    );
 
     for (const entry of entries) {
       if (entry.isDirectory() && entry.name !== "latest") {
         // Check if this version directory has actual index files
         const versionPath = path.join(indexesPath, entry.name);
         const files = fs.readdirSync(versionPath);
+        console.log(
+          `Version ${entry.name} has ${files.length} files: ${files.join(", ")}`
+        );
         if (files.length > 0) {
           versions.push(entry.name);
         }
       }
     }
 
+    console.log(`Found versions: ${versions.join(", ")}`);
     return versions.sort();
   } catch (error) {
     console.log("Error checking appdata versions:", error);
@@ -272,16 +284,37 @@ class IfsCloudMcpServerProvider implements vscode.McpServerDefinitionProvider {
 
     // Critical: Check if any versions are available before providing the server
     try {
+      console.log("IFS Cloud MCP: Checking if versions are available...");
       const versionsAvailable = await checkVersionsAvailable();
+      console.log(`IFS Cloud MCP: Versions available: ${versionsAvailable}`);
+
       if (!versionsAvailable) {
         console.log(
           "IFS Cloud MCP: No indexed versions available - not registering server"
         );
+
+        // Also try the direct appdata check here as additional debugging
+        const directCheck = checkAppdataVersions();
+        console.log(
+          `IFS Cloud MCP: Direct appdata check found: ${directCheck.join(", ")}`
+        );
+
         return [];
       }
     } catch (error) {
       console.log("IFS Cloud MCP: Error checking versions:", error);
-      return [];
+
+      // Try direct appdata check as fallback
+      const directCheck = checkAppdataVersions();
+      console.log(
+        `IFS Cloud MCP: Direct appdata fallback found: ${directCheck.join(
+          ", "
+        )}`
+      );
+
+      if (directCheck.length === 0) {
+        return [];
+      }
     }
 
     // Verify the selected version exists if specified
@@ -538,6 +571,30 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const debugPathsCommand = vscode.commands.registerCommand(
+    "ifs-cloud-mcp.debugPaths",
+    async () => {
+      const appdataPath = getAppdataPath();
+      const indexesPath = path.join(appdataPath, "indexes");
+      const versions = checkAppdataVersions();
+      const versionsAvailable = await checkVersionsAvailable();
+
+      const message = `Appdata Path: ${appdataPath}\nIndexes Path: ${indexesPath}\nFound Versions: ${
+        versions.join(", ") || "None"
+      }\nExists: ${fs.existsSync(
+        indexesPath
+      )}\ncheckVersionsAvailable(): ${versionsAvailable}`;
+      vscode.window.showInformationMessage(message, { modal: true });
+      console.log(message);
+
+      // Trigger MCP provider refresh
+      if (mcpServerProvider) {
+        console.log("Triggering MCP server provider refresh...");
+        mcpServerProvider.refresh();
+      }
+    }
+  );
+
   context.subscriptions.push(
     installCommand,
     importZipCommand,
@@ -552,7 +609,8 @@ export function activate(context: vscode.ExtensionContext) {
     showMcpOutputCommand,
     showWebUIOutputCommand,
     openWebUICommand,
-    generateConfigCommand
+    generateConfigCommand,
+    debugPathsCommand
   );
 
   // Register MCP Server Definition Provider
@@ -573,18 +631,31 @@ export function activate(context: vscode.ExtensionContext) {
 // New version-related functions for enhanced server management
 async function listAvailableVersions(): Promise<string[]> {
   try {
+    // Primary method: Check appdata directory directly
+    const appdataVersions = checkAppdataVersions();
+    console.log(
+      `Direct appdata check found versions: ${appdataVersions.join(", ")}`
+    );
+
+    if (appdataVersions.length > 0) {
+      console.log("Using direct appdata check for version list");
+      return appdataVersions;
+    }
+
+    // Fallback: Try server command only if appdata check finds nothing
+    console.log("No versions in appdata, trying server command as fallback...");
+
     const config = vscode.workspace.getConfiguration("ifsCloudMcp");
     const installationPath = config.get<string>("installationPath");
 
     if (!installationPath || !fs.existsSync(installationPath)) {
-      // If server isn't installed, check appdata directly as fallback
-      const appdataVersions = checkAppdataVersions();
-      if (appdataVersions.length === 0) {
-        vscode.window.showErrorMessage(
-          "MCP Server not installed. Please install the server first."
-        );
-      }
-      return appdataVersions;
+      console.log(
+        "No server installation - cannot use server command fallback"
+      );
+      vscode.window.showErrorMessage(
+        "MCP Server not installed. Please install the server first."
+      );
+      return [];
     }
 
     // Use the virtual environment Python
@@ -595,14 +666,13 @@ async function listAvailableVersions(): Promise<string[]> {
         : path.join(venvPath, "bin", "python");
 
     if (!fs.existsSync(venvPython)) {
-      // If venv Python doesn't exist, check appdata directly as fallback
-      const appdataVersions = checkAppdataVersions();
-      if (appdataVersions.length === 0) {
-        vscode.window.showErrorMessage(
-          "Virtual environment not found. Please reinstall the server."
-        );
-      }
-      return appdataVersions;
+      console.log(
+        "Virtual environment not found - cannot use server command fallback"
+      );
+      vscode.window.showErrorMessage(
+        "Virtual environment not found. Please reinstall the server."
+      );
+      return [];
     }
 
     // Execute the list command with JSON output
@@ -613,31 +683,27 @@ async function listAvailableVersions(): Promise<string[]> {
     if (result.stdout) {
       try {
         const versionData = JSON.parse(result.stdout.trim());
+        console.log(
+          `Server command found versions: ${
+            versionData.versions?.join(", ") || "none"
+          }`
+        );
         return versionData.versions || [];
       } catch (parseError) {
         console.error("Failed to parse version list JSON:", parseError);
-        // If server command fails, check appdata directly as fallback
-        const appdataVersions = checkAppdataVersions();
-        if (appdataVersions.length === 0) {
-          vscode.window.showErrorMessage(
-            "Failed to parse version list from server."
-          );
-        }
-        return appdataVersions;
+        vscode.window.showErrorMessage(
+          "Failed to parse version list from server."
+        );
+        return [];
       }
     }
 
-    // If no server output, check appdata directly as fallback
-    const appdataVersions = checkAppdataVersions();
-    return appdataVersions;
+    console.log("Server command returned no output");
+    return [];
   } catch (error) {
     console.error("Failed to list versions:", error);
-    // If any error occurs, check appdata directly as fallback
-    const appdataVersions = checkAppdataVersions();
-    if (appdataVersions.length === 0) {
-      vscode.window.showErrorMessage(`Failed to list versions: ${error}`);
-    }
-    return appdataVersions;
+    vscode.window.showErrorMessage(`Failed to list versions: ${error}`);
+    return [];
   }
 }
 
@@ -662,20 +728,30 @@ async function selectVersionFromList(): Promise<string | undefined> {
 // Helper function to check if any versions are available
 async function checkVersionsAvailable(): Promise<boolean> {
   try {
+    // Primary method: Check appdata directory directly
+    const appdataVersions = checkAppdataVersions();
+    console.log(`Direct appdata check found: ${appdataVersions.join(", ")}`);
+
+    if (appdataVersions.length > 0) {
+      console.log("Using direct appdata check - versions found");
+      return true;
+    }
+
+    // Fallback: Try server command only if appdata check finds nothing
+    console.log("No versions in appdata, trying server command as fallback...");
+
     const config = vscode.workspace.getConfiguration("ifsCloudMcp");
     const installationPath = config.get<string>("installationPath");
 
     if (!installationPath || !fs.existsSync(installationPath)) {
-      // If server isn't installed, check appdata directly as fallback
-      const appdataVersions = checkAppdataVersions();
-      return appdataVersions.length > 0;
+      console.log("No server installation path");
+      return false;
     }
 
     const pythonExecutable = await findPythonExecutable();
     if (!pythonExecutable) {
-      // If no Python, check appdata directly as fallback
-      const appdataVersions = checkAppdataVersions();
-      return appdataVersions.length > 0;
+      console.log("No Python executable found");
+      return false;
     }
 
     const venvPath = path.join(installationPath, ".venv");
@@ -685,9 +761,8 @@ async function checkVersionsAvailable(): Promise<boolean> {
         : path.join(venvPath, "bin", "python");
 
     if (!fs.existsSync(venvPython)) {
-      // If venv Python doesn't exist, check appdata directly as fallback
-      const appdataVersions = checkAppdataVersions();
-      return appdataVersions.length > 0;
+      console.log("Virtual environment Python not found");
+      return false;
     }
 
     const listResult = await executeCommand(
@@ -697,21 +772,19 @@ async function checkVersionsAvailable(): Promise<boolean> {
     if (listResult.success && listResult.output) {
       try {
         const versions = JSON.parse(listResult.output);
+        console.log(`Server command found: ${versions.length} versions`);
         return versions && versions.length > 0;
-      } catch {
-        // If server command fails, check appdata directly as fallback
-        const appdataVersions = checkAppdataVersions();
-        return appdataVersions.length > 0;
+      } catch (error) {
+        console.log("Failed to parse server command output:", error);
+        return false;
       }
     }
 
-    // If server command fails, check appdata directly as fallback
-    const appdataVersions = checkAppdataVersions();
-    return appdataVersions.length > 0;
+    console.log("Server command failed");
+    return false;
   } catch (error) {
-    // If any error occurs, check appdata directly as fallback
-    const appdataVersions = checkAppdataVersions();
-    return appdataVersions.length > 0;
+    console.log("Error in checkVersionsAvailable:", error);
+    return false;
   }
 }
 

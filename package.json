@@ -2,7 +2,7 @@
   "name": "ifs-cloud-mcp-vscode",
   "displayName": "IFS Cloud MCP Server",
   "description": "Transform IFS Cloud development with AI-powered code intelligence. One-click installation, ZIP import workflow, and intelligent analysis of 15,000+ source files.",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "publisher": "sindrelinden",
   "enabledApiProposals": [
     "languageModelSystem"
@@ -79,6 +79,11 @@
       {
         "command": "ifs-cloud-mcp.listVersions",
         "title": "List Available Versions",
+        "category": "IFS Cloud"
+      },
+      {
+        "command": "ifs-cloud-mcp.debugPaths",
+        "title": "Debug: Check Appdata Paths",
         "category": "IFS Cloud"
       },
       {
