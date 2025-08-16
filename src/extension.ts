@@ -16,19 +16,36 @@ let mcpServerProvider: IfsCloudMcpServerProvider | null = null;
 const execAsync = promisify(exec);
 
 /**
- * Get the appdata directory where IFS Cloud MCP server stores indexed data
+ * Get the platform-appropriate data directory where IFS Cloud MCP server stores indexed data
  */
 function getAppdataPath(): string {
+  const appName = "ifs_cloud_mcp_server";
+  let basePath: string;
+
   if (process.platform === "win32") {
-    const appdata = process.env.APPDATA || os.homedir();
-    const fullPath = path.join(appdata, "ifs_cloud_mcp_server");
+    // Windows: %APPDATA%/ifs_cloud_mcp_server
+    basePath =
+      process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming");
+    const fullPath = path.join(basePath, appName);
     console.log(
       `Windows appdata path: ${fullPath} (APPDATA=${process.env.APPDATA})`
     );
     return fullPath;
+  } else if (process.platform === "darwin") {
+    // macOS: ~/Library/Application Support/ifs_cloud_mcp_server
+    basePath = path.join(os.homedir(), "Library", "Application Support");
+    const fullPath = path.join(basePath, appName);
+    console.log(`macOS data path: ${fullPath}`);
+    return fullPath;
   } else {
-    // For non-Windows systems, use a similar location
-    return path.join(os.homedir(), ".ifs_cloud_mcp_server");
+    // Linux/Unix: ~/.local/share/ifs_cloud_mcp_server
+    basePath =
+      process.env.XDG_DATA_HOME || path.join(os.homedir(), ".local", "share");
+    const fullPath = path.join(basePath, appName);
+    console.log(
+      `Linux data path: ${fullPath} (XDG_DATA_HOME=${process.env.XDG_DATA_HOME})`
+    );
+    return fullPath;
   }
 }
 

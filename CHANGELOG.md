@@ -2,6 +2,59 @@
 
 All notable changes to the "ifs-cloud-mcp-vscode" extension will be documented in this file.
 
+## [0.2.5] - 2025-08-16
+
+### 🌍 Cross-Platform Data Directory Support
+
+- **Platform-Specific Paths**: Updated data directory logic to match Python server exactly
+  - Windows: `%APPDATA%\ifs_cloud_mcp_server` (unchanged)
+  - macOS: `~/Library/Application Support/ifs_cloud_mcp_server`
+  - Linux: `~/.local/share/ifs_cloud_mcp_server` (respects `XDG_DATA_HOME`)
+- **Standards Compliant**: Follows platform conventions for user data storage
+- **Enhanced Logging**: Shows which platform-specific path is being used for debugging
+
+## [0.2.4] - 2025-08-16
+
+### 🎯 Direct Data Detection (Primary Method)
+
+- **Prioritized Appdata Check**: Direct filesystem check is now the primary method for finding indexed versions
+- **Reliable Version Detection**: No longer dependent on server installation status for finding existing data
+- **Fallback Logic**: Server command used only when direct check finds no versions
+- **Data Persistence**: Indexed data survives server reinstallation and extension updates
+
+### 🔧 Enhanced Reliability
+
+- **Reduced Dependencies**: Less reliance on Python environment and server installation for version detection
+- **Better Error Recovery**: Multiple fallback mechanisms ensure data is found when it exists
+- **Improved Logging**: Clear indication of which detection method is being used
+
+## [0.2.3] - 2025-08-16
+
+### 🐛 Debug & Diagnostics Improvements
+
+- **Enhanced MCP Provider Logging**: Detailed console output shows exact version checking process
+- **Fallback Debugging**: Additional logging when primary server command fails
+- **Debug Command Enhancement**: Shows both direct check and `checkVersionsAvailable()` results
+- **Provider Refresh Trigger**: Debug command now refreshes MCP provider to test registration
+
+## [0.2.2] - 2025-08-16
+
+### 🔍 Advanced Debugging Features
+
+- **New Debug Command**: "Debug: Check Appdata Paths" command for troubleshooting
+- **Direct Filesystem Validation**: Added `checkAppdataVersions()` function for direct data verification
+- **Appdata Fallback Logic**: Enhanced version detection with direct filesystem checks as fallback
+- **Detailed Console Logging**: Extensive logging for debugging data detection issues
+
+## [0.2.1] - 2025-08-16
+
+### 🛠️ Data Persistence Fixes
+
+- **Appdata Integration**: Added direct filesystem check for indexed data in user's appdata directory
+- **Installation Independence**: Extension can find existing indexed data even during server reinstallation
+- **Multiple Detection Methods**: Combined server command and direct filesystem approaches
+- **Error Resilience**: Graceful handling of server installation issues
+
 ## [0.2.0] - 2025-08-15
 
 ### 🚀 Major: Automatic GitHub Copilot Chat Integration
