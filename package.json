@@ -212,17 +212,6 @@
     },
     "languages": [
       {
-        "id": "marble",
-        "aliases": [
-          "IFS Cloud",
-          "marble"
-        ],
-        "extensions": [
-          ".marble"
-        ],
-        "configuration": "./language-configuration.json"
-      },
-      {
         "id": "ifs-client",
         "aliases": [
           "IFS Client (*.client)",
@@ -258,11 +247,6 @@
     ],
     "grammars": [
       {
-        "language": "marble",
-        "scopeName": "source.marble",
-        "path": "./syntaxes/marble.tmLanguage.json"
-      },
-      {
         "language": "ifs-client",
         "scopeName": "source.client",
         "path": "./syntaxes/client.tmLanguage.json"
@@ -276,24 +260,6 @@
         "language": "ifs-fragment",
         "scopeName": "source.fragment",
         "path": "./syntaxes/fragment.tmLanguage.json"
-      }
-    ],
-    "snippets": [
-      {
-        "language": "marble",
-        "path": "./snippets/marble.json"
-      },
-      {
-        "language": "ifs-client",
-        "path": "./snippets/marble.json"
-      },
-      {
-        "language": "ifs-projection",
-        "path": "./snippets/marble.json"
-      },
-      {
-        "language": "ifs-fragment",
-        "path": "./snippets/marble.json"
       }
     ]
   },
