@@ -2,7 +2,7 @@
   "name": "ifs-cloud-mcp-vscode",
   "displayName": "IFS Cloud MCP Server",
   "description": "Transform IFS Cloud development with AI-powered code intelligence. One-click installation, ZIP import workflow, and intelligent analysis of 15,000+ source files.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "sindrelinden",
   "enabledApiProposals": [
     "languageModelSystem"
@@ -33,7 +33,7 @@
     "theme": "dark"
   },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.96.0"
   },
   "categories": [
     "Machine Learning",
@@ -47,121 +47,145 @@
   "contributes": {
     "commands": [
       {
-        "command": "ifs-cloud-mcp.install",
-        "title": "Install IFS Cloud MCP Server",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.install",
+        "title": "Install MCP Server",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.importZip",
-        "title": "Import IFS Cloud ZIP File",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.showInstructions",
+        "title": "Show Instructions",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.showInstructions",
-        "title": "Show ZIP Import Instructions",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.openLifecycleWebsite",
+        "title": "Download ZIP from IFS Lifecycle",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.status",
-        "title": "Check MCP Server Registration Status",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.importZip",
+        "title": "Import ZIP",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.configure",
-        "title": "Configure IFS Cloud MCP Server",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.fastSetup",
+        "title": "Fast Setup",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.selectVersion",
-        "title": "Select IFS Cloud Version",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.completeSetup",
+        "title": "Complete Setup",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.listVersions",
-        "title": "List Available Versions",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.downloadPrebuiltIndexes",
+        "title": "Download Pre-built Indexes",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.debugPaths",
-        "title": "Debug: Check Appdata Paths",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.analyzeCoupledCodebase",
+        "title": "Analyze Codebase",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.troubleshoot",
-        "title": "Troubleshoot Installation",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.calculatePagerank",
+        "title": "Calculate PageRank",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.startWebUI",
-        "title": "Start Web UI",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.createEmbeddings",
+        "title": "Create Embeddings",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.stopWebUI",
-        "title": "Stop Web UI",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.reindexBm25s",
+        "title": "Reindex BM25S",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.showMcpOutput",
-        "title": "Show MCP Server Output",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.startServer",
+        "title": "Start MCP Server",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.showWebUIOutput",
-        "title": "Show Web UI Output",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.stopServer",
+        "title": "Stop MCP Server",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.openWebUI",
-        "title": "Open Web UI in Browser",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.listVersions",
+        "title": "List Versions",
+        "category": "IFS Cloud MCP"
       },
       {
-        "command": "ifs-cloud-mcp.generateConfig",
-        "title": "Show MCP Server Status & Configuration",
-        "category": "IFS Cloud"
+        "command": "ifsCloudMcp.deleteVersion",
+        "title": "Delete Version",
+        "category": "IFS Cloud MCP"
+      },
+      {
+        "command": "ifsCloudMcp.checkStatus",
+        "title": "Check Status",
+        "category": "IFS Cloud MCP"
+      },
+      {
+        "command": "ifsCloudMcp.openCommandPalette",
+        "title": "Open Command Palette",
+        "category": "IFS Cloud MCP"
+      },
+      {
+        "command": "ifsCloudMcp.smartServerToggle",
+        "title": "Toggle MCP Server",
+        "category": "IFS Cloud MCP"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "ifs-cloud-mcp.install"
+          "command": "ifsCloudMcp.install"
         },
         {
-          "command": "ifs-cloud-mcp.importZip"
+          "command": "ifsCloudMcp.showInstructions"
         },
         {
-          "command": "ifs-cloud-mcp.showInstructions"
+          "command": "ifsCloudMcp.openLifecycleWebsite"
         },
         {
-          "command": "ifs-cloud-mcp.status"
+          "command": "ifsCloudMcp.importZip"
         },
         {
-          "command": "ifs-cloud-mcp.configure"
+          "command": "ifsCloudMcp.fastSetup"
         },
         {
-          "command": "ifs-cloud-mcp.selectVersion"
+          "command": "ifsCloudMcp.completeSetup"
         },
         {
-          "command": "ifs-cloud-mcp.listVersions"
+          "command": "ifsCloudMcp.downloadPrebuiltIndexes"
         },
         {
-          "command": "ifs-cloud-mcp.troubleshoot"
+          "command": "ifsCloudMcp.analyzeCoupledCodebase"
         },
         {
-          "command": "ifs-cloud-mcp.startWebUI"
+          "command": "ifsCloudMcp.calculatePagerank"
         },
         {
-          "command": "ifs-cloud-mcp.stopWebUI"
+          "command": "ifsCloudMcp.createEmbeddings"
         },
         {
-          "command": "ifs-cloud-mcp.showMcpOutput"
+          "command": "ifsCloudMcp.reindexBm25s"
         },
         {
-          "command": "ifs-cloud-mcp.showWebUIOutput"
+          "command": "ifsCloudMcp.startServer"
         },
         {
-          "command": "ifs-cloud-mcp.openWebUI"
+          "command": "ifsCloudMcp.stopServer"
+        },
+        {
+          "command": "ifsCloudMcp.listVersions"
+        },
+        {
+          "command": "ifsCloudMcp.deleteVersion"
+        },
+        {
+          "command": "ifsCloudMcp.checkStatus"
         }
       ]
     },
@@ -174,25 +198,10 @@
     "configuration": {
       "title": "IFS Cloud MCP Server",
       "properties": {
-        "ifsCloudMcp.serverPath": {
-          "type": "string",
-          "default": "",
-          "description": "Path to the IFS Cloud MCP Server installation"
-        },
-        "ifsCloudMcp.installationPath": {
-          "type": "string",
-          "default": "",
-          "description": "Directory where IFS Cloud MCP Server is installed"
-        },
-        "ifsCloudMcp.indexPath": {
-          "type": "string",
-          "default": "",
-          "description": "Path to the IFS Cloud code index (legacy - use selectedVersion instead)"
-        },
         "ifsCloudMcp.selectedVersion": {
           "type": "string",
           "default": "",
-          "description": "Selected IFS Cloud version for version-based server startup"
+          "description": "Selected IFS Cloud version for MCP server operations"
         },
         "ifsCloudMcp.autoStart": {
           "type": "boolean",
@@ -209,9 +218,39 @@
           "marble"
         ],
         "extensions": [
-          ".marble",
-          ".client",
-          ".projection",
+          ".marble"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "ifs-client",
+        "aliases": [
+          "IFS Client (*.client)",
+          "ifs-client"
+        ],
+        "extensions": [
+          ".client"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "ifs-projection",
+        "aliases": [
+          "IFS Projection (*.projection)",
+          "ifs-projection"
+        ],
+        "extensions": [
+          ".projection"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "ifs-fragment",
+        "aliases": [
+          "IFS Fragment (*.fragment)",
+          "ifs-fragment"
+        ],
+        "extensions": [
           ".fragment"
         ],
         "configuration": "./language-configuration.json"
@@ -222,18 +261,38 @@
         "language": "marble",
         "scopeName": "source.marble",
         "path": "./syntaxes/marble.tmLanguage.json"
-      }
-    ],
-    "themes": [
+      },
       {
-        "label": "IFS Cloud Marble - Pastel Dark",
-        "uiTheme": "vs-dark",
-        "path": "./themes/marble-dark-theme.json"
+        "language": "ifs-client",
+        "scopeName": "source.client",
+        "path": "./syntaxes/client.tmLanguage.json"
+      },
+      {
+        "language": "ifs-projection",
+        "scopeName": "source.projection",
+        "path": "./syntaxes/projection.tmLanguage.json"
+      },
+      {
+        "language": "ifs-fragment",
+        "scopeName": "source.fragment",
+        "path": "./syntaxes/fragment.tmLanguage.json"
       }
     ],
     "snippets": [
       {
         "language": "marble",
+        "path": "./snippets/marble.json"
+      },
+      {
+        "language": "ifs-client",
+        "path": "./snippets/marble.json"
+      },
+      {
+        "language": "ifs-projection",
+        "path": "./snippets/marble.json"
+      },
+      {
+        "language": "ifs-fragment",
         "path": "./snippets/marble.json"
       }
     ]
@@ -244,9 +303,9 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.74.0",
-    "@types/node": "16.x",
-    "typescript": "^4.9.4"
+    "@types/vscode": "^1.96.0",
+    "@types/node": "18.x",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "axios": "^1.6.0"

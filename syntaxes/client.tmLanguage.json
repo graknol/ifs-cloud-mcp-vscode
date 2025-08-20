@@ -1,0 +1,421 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "IFS Client",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#client-specific"
+    },
+    {
+      "include": "#attribute-properties"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#declarations"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.block",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.dashes",
+          "match": "^\\s*-{10,}.*$"
+        }
+      ]
+    },
+    "client-specific": {
+      "patterns": [
+        {
+          "name": "meta.client.header",
+          "match": "\\b(client)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.client"
+            }
+          }
+        },
+        {
+          "name": "meta.client.component",
+          "match": "\\b(component)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.other"
+            },
+            "2": {
+              "name": "entity.name.type.component"
+            }
+          }
+        },
+        {
+          "name": "meta.client.layer",
+          "match": "\\b(layer)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.other"
+            },
+            "2": {
+              "name": "entity.name.type.layer"
+            }
+          }
+        },
+        {
+          "name": "meta.client.projection-ref",
+          "match": "\\b(projection)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.other"
+            },
+            "2": {
+              "name": "entity.name.type.projection"
+            }
+          }
+        },
+        {
+          "name": "meta.client.include",
+          "match": "\\b(include)\\s+(fragment)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.control.include"
+            },
+            "2": {
+              "name": "keyword.other"
+            },
+            "3": {
+              "name": "entity.name.type.fragment"
+            }
+          }
+        },
+        {
+          "name": "meta.client.warnings",
+          "match": "\\b(warningsenabled)\\s*=\\s*([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.other"
+            },
+            "2": {
+              "name": "entity.name.type"
+            }
+          }
+        }
+      ]
+    },
+    "attribute-properties": {
+      "patterns": [
+        {
+          "name": "meta.attribute.property.sql",
+          "begin": "\\b(fetch|where|from)\\s*=\\s*\"",
+          "end": "\";?",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.modifier"
+            }
+          },
+          "contentName": "source.sql.embedded",
+          "patterns": [
+            {
+              "include": "source.sql"
+            },
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "meta.attribute.property",
+          "match": "\\b(label|editable|visible|enabled|required|keys|component|layer|description|category|search|hidekey|details|validate|execute|bulkexecute|bulknavigate|navigate|mode|startupmode|multiselect|size|format|pasteoption|contactwidget|source|lovswitch|emphasis|style|multiline|columnexclude|using|default|ludependencies|orderby|bind|selector|group|list|columns|maxrows|parentfilter|showpopup|showshelf|includeifempty|filter|summary|showpublicnotes|showhistory|datasource|fieldranking)\\s*=",
+          "captures": {
+            "1": {
+              "name": "storage.modifier"
+            }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control",
+          "match": "\\b(if|else|while|for|foreach|do|break|continue|return|try|catch|finally|throw|switch|case|default|when|OK|exit|success|error|confirm)\\b"
+        },
+        {
+          "name": "storage.type.declaration",
+          "match": "\\b(client|navigator|page|command|selector|group|list|card|dialog|chart|sheet|tree|plugin|variable|field|badge|lov|commandgroup|static)\\b"
+        },
+        {
+          "name": "keyword.other",
+          "match": "\\b(using|with|for|at|index|parent|into|set|call|bulkcall|stringify|navigate|bulknavigate|details|validate|execute|bulkexecute|include|fragment|component|layer|projection|warningsenabled|entry|static|SelectedRecords|SingleRecord|JSON|NoPaste|Large|decimal|Person|true|false|null|fieldranking)\\b"
+        },
+        {
+          "name": "storage.modifier",
+          "match": "\\b(public|private|protected|static|readonly|const|required|editable|visible|enabled)\\b"
+        },
+        {
+          "name": "keyword.operator",
+          "match": "\\b(and|or|not|is|as|new|eq|ne|gt|lt|ge|le)\\b"
+        },
+        {
+          "name": "support.type",
+          "match": "\\b(Text|Number|Date|Boolean|Stream|Enumeration)\\b"
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "name": "meta.navigator.declaration",
+          "begin": "\\b(navigator)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.page.declaration",
+          "begin": "\\b(page)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(using)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.page"
+            },
+            "3": {
+              "name": "keyword.other"
+            },
+            "4": {
+              "name": "entity.name.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.command.declaration",
+          "begin": "\\b(command)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(for)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.function"
+            },
+            "3": {
+              "name": "keyword.other"
+            },
+            "4": {
+              "name": "entity.name.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.list.declaration",
+          "begin": "\\b(list)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(for)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.list"
+            },
+            "3": {
+              "name": "keyword.other"
+            },
+            "4": {
+              "name": "entity.name.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.selector.declaration",
+          "begin": "\\b(selector)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(for)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.selector"
+            },
+            "3": {
+              "name": "keyword.other"
+            },
+            "4": {
+              "name": "entity.name.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.variable.declaration",
+          "begin": "\\b(variable)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "variable.parameter"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            },
+            {
+              "name": "constant.other.placeholder",
+              "match": "\\$\\[[^\\]]*\\]"
+            },
+            {
+              "name": "constant.other.placeholder",
+              "match": "\\$\\{[^}]*\\}"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.decimal",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.integer",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.comparison",
+          "match": "==|!=|<|>|<=|>=|<>|eq|ne|gt|lt|ge|le"
+        },
+        {
+          "name": "keyword.operator.logical",
+          "match": "\\b(AND|OR|NOT|IN|and|or|not)\\b"
+        },
+        {
+          "name": "keyword.operator.arithmetic",
+          "match": "\\+|-|\\*|/|%"
+        },
+        {
+          "name": "punctuation.separator",
+          "match": "[,;]"
+        },
+        {
+          "name": "punctuation.section.brackets",
+          "match": "[\\[\\]]"
+        },
+        {
+          "name": "punctuation.section.parens",
+          "match": "[()]"
+        },
+        {
+          "name": "punctuation.section.braces",
+          "match": "[{}]"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "entity.name.type",
+          "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.client"
+}

@@ -1,0 +1,503 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "IFS Fragment",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#fragment-header"
+    },
+    {
+      "include": "#fragment-sections"
+    },
+    {
+      "include": "#attribute-properties"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#declarations"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.block",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.dashes",
+          "match": "^\\s*-{10,}.*$"
+        }
+      ]
+    },
+    "fragment-header": {
+      "patterns": [
+        {
+          "name": "meta.fragment.header",
+          "match": "\\b(fragment)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.fragment"
+            }
+          }
+        },
+        {
+          "name": "meta.fragment.component",
+          "match": "\\b(component)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.other"
+            },
+            "2": {
+              "name": "entity.name.type.component"
+            }
+          }
+        },
+        {
+          "name": "meta.fragment.layer",
+          "match": "\\b(layer)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "keyword.other"
+            },
+            "2": {
+              "name": "entity.name.type.layer"
+            }
+          }
+        },
+        {
+          "name": "meta.fragment.description",
+          "begin": "\\b(description)\\s+\"",
+          "end": "\";",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other"
+            }
+          },
+          "contentName": "string.quoted.double",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "fragment-sections": {
+      "patterns": [
+        {
+          "name": "meta.fragment.client-section",
+          "begin": "^\\s*-{10,}.*CLIENT FRAGMENTS.*-{10,}.*$",
+          "end": "^\\s*-{10,}.*PROJECTION FRAGMENTS.*-{10,}.*$",
+          "beginCaptures": {
+            "0": {
+              "name": "comment.line.dashes"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "comment.line.dashes"
+            }
+          },
+          "contentName": "meta.embedded.client",
+          "patterns": [
+            {
+              "include": "source.client"
+            },
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#overtake-annotation"
+            },
+            {
+              "include": "#client-declarations"
+            },
+            {
+              "include": "#attribute-properties"
+            },
+            {
+              "include": "#keywords"
+            },
+            {
+              "include": "#strings"
+            },
+            {
+              "include": "#numbers"
+            },
+            {
+              "include": "#operators"
+            },
+            {
+              "include": "#identifiers"
+            }
+          ]
+        },
+        {
+          "name": "meta.fragment.projection-section",
+          "begin": "^\\s*-{10,}.*PROJECTION FRAGMENTS.*-{10,}.*$",
+          "end": "^\\s*-{10,}.*MANUALLY ADDED PROJECTION FRAGMENTS.*-{10,}.*$|\\z",
+          "beginCaptures": {
+            "0": {
+              "name": "comment.line.dashes"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "comment.line.dashes"
+            }
+          },
+          "contentName": "meta.embedded.projection",
+          "patterns": [
+            {
+              "include": "source.projection"
+            },
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#projection-declarations"
+            },
+            {
+              "include": "#attribute-properties"
+            },
+            {
+              "include": "#keywords"
+            },
+            {
+              "include": "#strings"
+            },
+            {
+              "include": "#numbers"
+            },
+            {
+              "include": "#operators"
+            },
+            {
+              "include": "#identifiers"
+            }
+          ]
+        }
+      ]
+    },
+    "overtake-annotation": {
+      "patterns": [
+        {
+          "name": "meta.annotation.overtake",
+          "match": "\\b(@Overtake)\\s+([A-Z][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "storage.type.annotation"
+            },
+            "2": {
+              "name": "entity.name.type"
+            }
+          }
+        }
+      ]
+    },
+    "client-declarations": {
+      "patterns": [
+        {
+          "name": "meta.selector.declaration",
+          "begin": "\\b(selector)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(for)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.selector"
+            },
+            "3": {
+              "name": "keyword.other"
+            },
+            "4": {
+              "name": "entity.name.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.card.declaration",
+          "begin": "\\b(card)\\s+([A-Z][a-zA-Z0-9_]*)\\s+(for)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.card"
+            },
+            "3": {
+              "name": "keyword.other"
+            },
+            "4": {
+              "name": "entity.name.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "projection-declarations": {
+      "patterns": [
+        {
+          "name": "meta.query.declaration",
+          "begin": "\\b(query)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.query"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.entity.declaration",
+          "begin": "\\b(entity)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "entity.name.type.entity"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
+    "attribute-properties": {
+      "patterns": [
+        {
+          "name": "meta.attribute.property.sql",
+          "begin": "\\b(fetch|where|from)\\s*=\\s*\"",
+          "end": "\";?",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.modifier"
+            }
+          },
+          "contentName": "source.sql.embedded",
+          "patterns": [
+            {
+              "include": "source.sql"
+            },
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "meta.attribute.property",
+          "match": "\\b(label|editable|visible|enabled|required|keys|component|layer|description|category|lu|ludependencies|lovcolumn|format|fieldranking|default)\\s*=",
+          "captures": {
+            "1": {
+              "name": "storage.modifier"
+            }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control",
+          "match": "\\b(if|else|while|for|foreach|do|break|continue|return|try|catch|finally|throw|switch|case|default)\\b"
+        },
+        {
+          "name": "storage.type.declaration",
+          "match": "\\b(fragment|selector|card|query|entity|function|attribute|reference|parameter|entityset|field|static)\\b"
+        },
+        {
+          "name": "keyword.other",
+          "match": "\\b(component|layer|description|for|keys|from|lu|ludependencies|static|fieldranking|uppercase|@Overtake)\\b"
+        },
+        {
+          "name": "storage.modifier",
+          "match": "\\b(public|private|protected|static|readonly|const|required|editable|visible|enabled)\\b"
+        },
+        {
+          "name": "keyword.operator",
+          "match": "\\b(and|or|not|is|as|new|null|true|false)\\b"
+        },
+        {
+          "name": "support.type",
+          "match": "\\b(Text|Number|Date|Boolean|Stream|Enumeration|Timestamp)\\b"
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "name": "meta.attribute.declaration",
+          "begin": "\\b(attribute)\\s+([A-Z][a-zA-Z0-9_]*)\\s+([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "variable.other.property"
+            },
+            "3": {
+              "name": "support.type"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "name": "meta.field.declaration",
+          "match": "\\b(field)\\s+([A-Z][a-zA-Z0-9_]*);",
+          "captures": {
+            "1": {
+              "name": "storage.type.declaration"
+            },
+            "2": {
+              "name": "variable.other.property"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.decimal",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.integer",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.comparison",
+          "match": "==|!=|<|>|<=|>=|<>"
+        },
+        {
+          "name": "keyword.operator.logical",
+          "match": "\\b(AND|OR|NOT|IN)\\b"
+        },
+        {
+          "name": "keyword.operator.arithmetic",
+          "match": "\\+|-|\\*|/|%"
+        },
+        {
+          "name": "punctuation.separator",
+          "match": "[,;]"
+        },
+        {
+          "name": "punctuation.section.brackets",
+          "match": "[\\[\\]]"
+        },
+        {
+          "name": "punctuation.section.parens",
+          "match": "[()]"
+        },
+        {
+          "name": "punctuation.section.braces",
+          "match": "[{}]"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "entity.name.type",
+          "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.fragment"
+}
