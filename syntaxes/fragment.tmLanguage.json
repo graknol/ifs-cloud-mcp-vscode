@@ -338,7 +338,7 @@
         },
         {
           "name": "meta.attribute.property",
-          "match": "\\b(label|editable|visible|enabled|required|keys|component|layer|description|category|lu|ludependencies|lovcolumn|format|fieldranking|default)\\s*=",
+          "match": "\\b(label|editable|visible|enabled|required|keys|component|layer|description|category|lu|ludependencies|lovcolumn|format|default)\\s*=",
           "captures": {
             "1": {
               "name": "storage.modifier"
@@ -359,11 +359,11 @@
         },
         {
           "name": "keyword.other",
-          "match": "\\b(component|layer|description|for|keys|from|lu|ludependencies|static|fieldranking|uppercase|@Overtake)\\b"
+          "match": "\\b(component|layer|description|for|keys|from|lu|ludependencies|static|uppercase|@Overtake)\\b"
         },
         {
           "name": "storage.modifier",
-          "match": "\\b(public|private|protected|static|readonly|const|required|editable|visible|enabled)\\b"
+          "match": "\\b(public|private|protected|static|readonly|const|required|editable|visible|enabled|fieldranking)\\b"
         },
         {
           "name": "keyword.operator",
